@@ -4,5 +4,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="default_area_name">장애</string>
+    <string name="default_area">SeoulDisableWomenResourcesClass</string>
 </resources>

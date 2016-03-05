@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="row"
+            type="kr.susemi99.seoulwomen.models.RowItem"/>
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="5dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="3dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='@{"["+row.difficultyName+"] "}'
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#AD00FF"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{row.className}"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#AD00FF"/>
+        </LinearLayout>
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    style="@style/class_row_title"
+                    android:text="신청기간 : "/>
+
+                <TextView
+                    style="@style/class_row_value"
+                    android:text='@{row.displayReceiveFrom() +" "+ row.receiveTimeFrom +" ~ "+ row.displayReceiveTo() +" "+row.receiveTimeTo}'/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    style="@style/class_row_title"
+                    android:text="교육기간 : "/>
+
+                <TextView
+                    style="@style/class_row_value"
+                    android:text='@{row.displayEducateFrom() +" ~ "+row.displayEducateTo()}'/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    style="@style/class_row_title"
+                    android:text="교육시간 : "/>
+
+                <TextView
+                    style="@style/class_row_value"
+                    android:text='@{row.displayDays() +" "+ row.educateTimeFrom +" ~ "+ row.educateTimeTo}'/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    style="@style/class_row_title"
+                    android:text="잔여 : "/>
+
+                <TextView
+                    style="@style/class_row_value"
+                    android:text='@{row.displaySpareNum() +"/"+ row.displayCollectNum()+"명"}'/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    style="@style/class_row_title"
+                    android:text="수강료 : "/>
+
+                <TextView
+                    style="@style/class_row_value"
+                    android:text='@{row.displayEducateFee()}'/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    style="@style/class_row_title"
+                    android:text="접수 : "/>
+
+                <TextView
+                    style="@style/class_row_value"
+                    android:text="@{row.displayHowToRegist()}"/>
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+</layout>

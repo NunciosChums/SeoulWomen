@@ -1,11 +1,8 @@
-package kr.susemi99.seoulwomen.models.bases;
+package kr.susemi99.seoulwomen.models;
 
 import com.google.gson.annotations.SerializedName;
 
-import kr.susemi99.seoulwomen.models.ResultItem;
-import kr.susemi99.seoulwomen.models.RowItem;
-
-public class BaseClassItem
+public class WomenResourcesClassItem
 {
   @SerializedName("list_total_count")
   public Integer listTotalCount;
