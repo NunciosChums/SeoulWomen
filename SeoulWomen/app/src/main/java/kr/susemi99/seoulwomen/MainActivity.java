@@ -2,16 +2,24 @@ package kr.susemi99.seoulwomen;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+
+import kr.susemi99.seoulwomen.models.SeochoItem;
+import kr.susemi99.seoulwomen.models.bases.BaseClassItem;
+import kr.susemi99.seoulwomen.networks.WomenService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
   implements NavigationView.OnNavigationItemSelectedListener
@@ -95,6 +103,27 @@ public class MainActivity extends AppCompatActivity
     if (id == R.id.nav_camera)
     {
       // Handle the camera action
+      Log.i("MainActivity | onNavigationItemSelected", "|" + item.getTitleCondensed() + "|");
+      WomenService.api().seocho().enqueue(new Callback<SeochoItem>()
+      {
+        @Override
+        public void onResponse(Call<SeochoItem> call, Response<SeochoItem> response)
+        {
+          if (response != null && response.isSuccess() && response.body() != null)
+          {
+            BaseClassItem item = response.body().classes;
+            Log.i("MainActivity | onResponse", "|" + item.listTotalCount + "|" + item.rows.length + "|");
+
+          }
+
+        }
+
+        @Override
+        public void onFailure(Call<SeochoItem> call, Throwable t)
+        {
+
+        }
+      });
     }
     else if (id == R.id.nav_gallery)
     {
