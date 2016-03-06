@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">서울 여성인력 개발센터</string>
+    <string name="no_result">조회된 자료가 없습니다.</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="default_area_name">장애</string>
+    <string name="default_area">SeoulDisableWomenResourcesClass</string>
+</resources>
