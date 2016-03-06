@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import kr.susemi99.seoulwomen.adapters.ClassListAdapter;
+import kr.susemi99.seoulwomen.listeners.EndlessScrollListener;
 import kr.susemi99.seoulwomen.managers.PreferenceHelper;
 import kr.susemi99.seoulwomen.models.RowItem;
 import kr.susemi99.seoulwomen.models.WomenResourcesClassParentItem;
@@ -33,14 +34,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
-  implements NavigationView.OnNavigationItemSelectedListener
 {
+  private static final int OFFSET = 20;
+
   private ClassListAdapter adapter;
   private TextView emptyTextView;
   private SwipeRefreshLayout refreshLayout;
 
   private String areaName, area;
   private int startIndex, endIndex;
+  private ListView listView;
 
   @Override
   protected void onCreate(Bundle savedInstanceState)
@@ -57,21 +60,13 @@ public class MainActivity extends AppCompatActivity
     toggle.syncState();
 
     NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-    navigationView.setNavigationItemSelectedListener(this);
+    navigationView.setNavigationItemSelectedListener(navigationItemSelectedListener);
 
     refreshLayout = (SwipeRefreshLayout) findViewById(R.id.layout_refresh);
     refreshLayout.setOnRefreshListener(() -> {
-      startIndex = 1;
-      endIndex = 20;
+      resetIndex();
       load();
     });
-
-    adapter = new ClassListAdapter();
-    emptyTextView = (TextView) findViewById(android.R.id.empty);
-
-    ListView list = (ListView) findViewById(android.R.id.list);
-    list.setOnItemClickListener(itemClickListener);
-    list.setAdapter(adapter);
 
     areaName = PreferenceHelper.instance().lastSelectedAreaName();
     area = PreferenceHelper.instance().lastSelectedAreaValue();
@@ -81,7 +76,15 @@ public class MainActivity extends AppCompatActivity
       area = getString(R.string.default_area);
     }
 
-    navigationView.setCheckedItem(PreferenceHelper.instance().lastSelectedAreaIndex());
+    adapter = new ClassListAdapter();
+    emptyTextView = (TextView) findViewById(android.R.id.empty);
+
+    listView = (ListView) findViewById(android.R.id.list);
+    listView.setAdapter(adapter);
+    listView.setOnItemClickListener(itemClickListener);
+    listView.setOnScrollListener(endlessScrollListener);
+
+    resetIndex();
     load();
   }
 
@@ -99,19 +102,12 @@ public class MainActivity extends AppCompatActivity
     }
   }
 
-  @Override
-  public boolean onNavigationItemSelected(MenuItem item)
+  private void resetIndex()
   {
-    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-    drawer.closeDrawer(GravityCompat.START);
-
-    PreferenceHelper.instance().lastSelectedAreaIndex(item.getOrder());
-
-    areaName = item.getTitle().toString();
-    area = item.getTitleCondensed().toString();
-    load();
-
-    return true;
+    startIndex = 1;
+    endIndex = OFFSET;
+    adapter.clear();
+    listView.setSelectionAfterHeaderView();
   }
 
   private void load()
@@ -120,22 +116,27 @@ public class MainActivity extends AppCompatActivity
     PreferenceHelper.instance().lastSelectedAreaValue(area);
     setTitle(areaName + " 여성인력 개발센터 교육강좌");
 
-    adapter.clear();
     emptyTextView.setVisibility(View.GONE);
 
-    WomenService.api().list(area).enqueue(new Callback<ResponseBody>()
+    WomenService.api().list(area, startIndex, endIndex).enqueue(new Callback<ResponseBody>()
     {
       @Override
       public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response)
       {
         refreshLayout.setRefreshing(false);
+
         try
         {
-          String result = response.body().string();
-          result = result.replace(area, "WomenResourcesClass");
+          String responseString = response.body().string();
+          responseString = responseString.replace(area, "WomenResourcesClass");
 
           Gson gson = new GsonBuilder().create();
-          WomenResourcesClassParentItem item = gson.fromJson(result, WomenResourcesClassParentItem.class);
+          WomenResourcesClassParentItem item = gson.fromJson(responseString, WomenResourcesClassParentItem.class);
+
+          if (item.classItem == null)
+          {
+            return;
+          }
 
           for (RowItem row : item.classItem.rows)
           {
@@ -145,7 +146,6 @@ public class MainActivity extends AppCompatActivity
         } catch (IOException e)
         {
           e.printStackTrace();
-          displayErrorString(e.getLocalizedMessage());
         }
       }
 
@@ -164,9 +164,38 @@ public class MainActivity extends AppCompatActivity
     emptyTextView.setVisibility(View.VISIBLE);
   }
 
+  private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = new NavigationView.OnNavigationItemSelectedListener()
+  {
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item)
+    {
+      DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+      drawer.closeDrawer(GravityCompat.START);
+
+      areaName = item.getTitle().toString();
+      area = item.getTitleCondensed().toString();
+      resetIndex();
+      load();
+
+      return true;
+    }
+  };
+
   private AdapterView.OnItemClickListener itemClickListener = (parent, view, position, id) -> {
     RowItem item = (RowItem) parent.getItemAtPosition(position);
     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.url));
     startActivity(intent);
+  };
+
+  private EndlessScrollListener endlessScrollListener = new EndlessScrollListener()
+  {
+    @Override
+    public boolean onLoadMore(int page, int totalItemsCount)
+    {
+      startIndex = endIndex + 1;
+      endIndex += OFFSET;
+      load();
+      return true;
+    }
   };
 }

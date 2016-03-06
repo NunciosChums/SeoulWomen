@@ -7,7 +7,6 @@ public class PreferenceHelper extends BasePreferenceHelper
 {
   private static final String LAST_SELECTED_AREA_VALUE = "last_selected_area_value";
   private static final String LAST_SELECTED_AREA_NAME = "last_selected_area_name";
-  private static final String LAST_SELECTED_AREA_INDEX = "last_selected_area_index";
 
   public static synchronized PreferenceHelper instance()
   {
@@ -32,15 +31,5 @@ public class PreferenceHelper extends BasePreferenceHelper
   public String lastSelectedAreaName()
   {
     return get(LAST_SELECTED_AREA_NAME);
-  }
-
-  public void lastSelectedAreaIndex(int value)
-  {
-    put(LAST_SELECTED_AREA_INDEX, value);
-  }
-
-  public int lastSelectedAreaIndex()
-  {
-    return get(LAST_SELECTED_AREA_INDEX, 0);
   }
 }

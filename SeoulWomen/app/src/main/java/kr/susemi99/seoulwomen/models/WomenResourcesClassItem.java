@@ -5,10 +5,10 @@ import com.google.gson.annotations.SerializedName;
 public class WomenResourcesClassItem
 {
   @SerializedName("list_total_count")
-  public Integer listTotalCount;
+  public int listTotalCount;
 
   @SerializedName("RESULT")
-  public ResultItem resullt;
+  public ResultItem result;
 
   @SerializedName("row")
   public RowItem[] rows;

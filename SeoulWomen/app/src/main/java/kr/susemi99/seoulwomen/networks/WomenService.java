@@ -19,7 +19,7 @@ public final class WomenService
 
   public interface ListAPI
   {
-    @GET("{name}/1/2")
-    Call<ResponseBody> list(@Path("name") String name);
+    @GET("{name}/{start_index}/{end_index}")
+    Call<ResponseBody> list(@Path("name") String name, @Path("start_index") int startIndex, @Path("end_index") int endInde);
   }
 }
