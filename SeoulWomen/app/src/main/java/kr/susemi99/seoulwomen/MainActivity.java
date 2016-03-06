@@ -138,6 +138,12 @@ public class MainActivity extends AppCompatActivity
             return;
           }
 
+          if (item.classItem.rows.length == 0)
+          {
+            displayErrorString(getString(R.string.no_result));
+            return;
+          }
+
           for (RowItem row : item.classItem.rows)
           {
             adapter.add(row);
