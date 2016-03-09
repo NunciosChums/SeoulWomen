@@ -5,8 +5,8 @@ package kr.susemi99.seoulwomen.managers;
  */
 public class PreferenceHelper extends BasePreferenceHelper
 {
-  private static final String LAST_SELECTED_AREA_VALUE = "last_selected_area_value";
-  private static final String LAST_SELECTED_AREA_NAME = "last_selected_area_name";
+  private static final String LAST_SELECTED_AREA_VALUE = "last_selected_area_value_v1";
+  private static final String LAST_SELECTED_AREA_NAME = "last_selected_area_name_v1";
 
   public static synchronized PreferenceHelper instance()
   {
