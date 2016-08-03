@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <data>
-
-        <variable
-            name="row"
-            type="kr.susemi99.seoulwomen.models.RowItem"/>
-    </data>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         android:orientation="vertical"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
@@ -20,105 +22,86 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="3dp">
+            android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/text_difficulty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text='@{"["+row.difficultyName+"] "}'
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#AD00FF"/>
+                android:textColor="#AD00FF"
+                tools:text="[초급]"/>
 
             <TextView
+                android:id="@+id/text_class_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{row.className}"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#AD00FF"/>
+                android:textColor="#AD00FF"
+                tools:text="[돌봄] 영유아 돌봄이(베이비시터)_9월"/>
         </LinearLayout>
 
-        <TableLayout
+        <GridLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:columnCount="2">
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <TextView
+                style="@style/class_row_title"
+                android:text="신청기간 : "/>
 
-                <TextView
-                    style="@style/class_row_title"
-                    android:text="신청기간 : "/>
+            <TextView
+                android:id="@+id/text_receive_at"
+                style="@style/class_row_value"
+                tools:text="2015.12.28 ~ 2016.09.12 18:00"/>
 
-                <TextView
-                    style="@style/class_row_value"
-                    android:text='@{row.displayReceiveFrom() +" "+ row.receiveTimeFrom +" ~ "+ row.displayReceiveTo() +" "+row.receiveTimeTo}'/>
-            </TableRow>
+            <TextView
+                style="@style/class_row_title"
+                android:text="교육기간 : "/>
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/text_educate_on"
+                style="@style/class_row_value"
+                tools:text="2016.09.19 ~ 2016.09.30"/>
 
-                <TextView
-                    style="@style/class_row_title"
-                    android:text="교육기간 : "/>
+            <TextView
+                style="@style/class_row_title"
+                android:text="교육시간 : "/>
 
-                <TextView
-                    style="@style/class_row_value"
-                    android:text='@{row.displayEducateFrom() +" ~ "+row.displayEducateTo()}'/>
-            </TableRow>
+            <TextView
+                android:id="@+id/text_educate_at"
+                style="@style/class_row_value"
+                tools:text="월화수목금 09:30 ~ 13:30"/>
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <TextView
+                style="@style/class_row_title"
+                android:layout_gravity="fill"
+                android:text="잔여 : "/>
 
-                <TextView
-                    style="@style/class_row_title"
-                    android:text="교육시간 : "/>
+            <TextView
+                android:id="@+id/text_spare"
+                style="@style/class_row_value"
+                tools:text="0/20명"/>
 
-                <TextView
-                    style="@style/class_row_value"
-                    android:text='@{row.displayDays() +" "+ row.educateTimeFrom +" ~ "+ row.educateTimeTo}'/>
-            </TableRow>
+            <TextView
+                style="@style/class_row_title"
+                android:layout_gravity="fill"
+                android:text="수강료 : "/>
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/text_fee"
+                style="@style/class_row_value"
+                tools:text="80,000원"/>
 
-                <TextView
-                    style="@style/class_row_title"
-                    android:text="잔여 : "/>
+            <TextView
+                style="@style/class_row_title"
+                android:layout_gravity="fill"
+                android:text="접수 : "/>
 
-                <TextView
-                    style="@style/class_row_value"
-                    android:text='@{row.displaySpareNum() +"/"+ row.displayCollectNum()+"명"}'/>
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    style="@style/class_row_title"
-                    android:text="수강료 : "/>
-
-                <TextView
-                    style="@style/class_row_value"
-                    android:text='@{row.displayEducateFee()}'/>
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    style="@style/class_row_title"
-                    android:text="접수 : "/>
-
-                <TextView
-                    style="@style/class_row_value"
-                    android:text="@{row.displayHowToRegist()}"/>
-            </TableRow>
-        </TableLayout>
+            <TextView
+                android:id="@+id/text_how_to_regist"
+                style="@style/class_row_value"
+                tools:text="방문, 온라인"/>
+        </GridLayout>
     </LinearLayout>
-</layout>
+</android.support.v7.widget.CardView>
