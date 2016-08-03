@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#AD00FF"
+                android:textColor="@color/row_title_color"
                 tools:text="[초급]"/>
 
             <TextView
@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#AD00FF"
+                android:textColor="@color/row_title_color"
                 tools:text="[돌봄] 영유아 돌봄이(베이비시터)_9월"/>
         </LinearLayout>
 
