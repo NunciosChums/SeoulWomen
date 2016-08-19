@@ -189,22 +189,4 @@ public class MainActivity extends AppCompatActivity
       return true;
     }
   };
-
-//  private AdapterView.OnItemClickListener itemClickListener = (parent, view, position, id) -> {
-//    RowItem item = (RowItem) parent.getItemAtPosition(position);
-//    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.url));
-//    startActivity(intent);
-//  };
-//
-//  private EndlessScrollListener endlessScrollListener = new EndlessScrollListener()
-//  {
-//    @Override
-//    public boolean onLoadMore(int page, int totalItemsCount)
-//    {
-//      startIndex = endIndex + 1;
-//      endIndex += OFFSET;
-//      load();
-//      return true;
-//    }
-//  };
 }
