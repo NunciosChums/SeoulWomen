@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import kr.susemi99.seoulwomen.utils.DateFormatter;
 import kr.susemi99.seoulwomen.utils.StringUtil;
 
-public class RowItem
-{
+public class RowItem {
   @SerializedName("CLASS_CODE")
   public String classCode;
   @SerializedName("CLASS_NAME")
@@ -66,93 +65,72 @@ public class RowItem
   @SerializedName("URL")
   public String url;
 
-  public String displayReceiveFrom()
-  {
+  public String displayReceiveFrom() {
     return DateFormatter.parseDate(receiveFrom, "yyyyMMdd");
   }
 
-  public String displayReceiveTo()
-  {
+  public String displayReceiveTo() {
     return DateFormatter.parseDate(receiveTo, "yyyyMMdd");
   }
 
-  public String displayEducateFrom()
-  {
+  public String displayEducateFrom() {
     return DateFormatter.parseDate(educateFrom, "yyyyMMdd");
   }
 
-  public String displayEducateTo()
-  {
+  public String displayEducateTo() {
     return DateFormatter.parseDate(educateTo, "yyyyMMdd");
   }
 
-  public String displaySpareNum()
-  {
+  public String displaySpareNum() {
     return StringUtil.addComma(Float.parseFloat(spareNum));
   }
 
-  public String displayDays()
-  {
+  public String displayDays() {
     StringBuilder builder = new StringBuilder();
-    if (!TextUtils.isEmpty(monday))
-    {
+    if(!TextUtils.isEmpty(monday)) {
       builder.append("월");
     }
-    if (!TextUtils.isEmpty(tuesday))
-    {
+    if(!TextUtils.isEmpty(tuesday)) {
       builder.append("화");
     }
-    if (!TextUtils.isEmpty(wednesday))
-    {
+    if(!TextUtils.isEmpty(wednesday)) {
       builder.append("수");
     }
-    if (!TextUtils.isEmpty(thursday))
-    {
+    if(!TextUtils.isEmpty(thursday)) {
       builder.append("목");
     }
-    if (!TextUtils.isEmpty(friday))
-    {
+    if(!TextUtils.isEmpty(friday)) {
       builder.append("금");
     }
-    if (!TextUtils.isEmpty(saturday))
-    {
+    if(!TextUtils.isEmpty(saturday)) {
       builder.append("토");
     }
-    if (!TextUtils.isEmpty(sunday))
-    {
+    if(!TextUtils.isEmpty(sunday)) {
       builder.append("일");
     }
     return builder.toString();
   }
 
-  public String displayCollectNum()
-  {
+  public String displayCollectNum() {
     return StringUtil.addComma(Float.parseFloat(collectNum));
   }
 
-  public String displayEducateFee()
-  {
+  public String displayEducateFee() {
     float floatFee = Float.parseFloat(educateFee);
     int intFee = (int) floatFee;
-    if (intFee == 0)
-    {
+    if(intFee == 0) {
       return "무료";
-    }
-    else
-    {
+    } else {
       return StringUtil.addComma(intFee) + "원";
     }
   }
 
-  public String displayHowToRegist()
-  {
+  public String displayHowToRegist() {
     ArrayList<String> result = new ArrayList<>();
-    if (visitReceiveFlag.equals("Y"))
-    {
+    if(visitReceiveFlag.equals("Y")) {
       result.add("방문");
     }
-    if (onlineReceiveFlag.equals("Y"))
-    {
+    if(onlineReceiveFlag.equals("Y")) {
       result.add("온라인");
     }
     return TextUtils.join(", ", result);

@@ -2,8 +2,7 @@ package kr.susemi99.seoulwomen.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class WomenResourcesClassItem
-{
+public class WomenResourcesClassItem {
   @SerializedName("list_total_count")
   public int listTotalCount;
 
