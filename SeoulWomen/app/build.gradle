@@ -13,8 +13,8 @@ android {
         applicationId "kr.susemi99.seoulwomen"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 6
-        versionName '1.4'
+        versionCode 7
+        versionName '1.5'
         multiDexEnabled true
 
         jackOptions.enabled true
