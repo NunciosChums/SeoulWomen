@@ -1,7 +1,5 @@
 package kr.susemi99.seoulwomen.adapters;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +9,15 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import kr.susemi99.seoulwomen.R;
-import kr.susemi99.seoulwomen.application.MyApp;
 import kr.susemi99.seoulwomen.models.RowItem;
 
 public class ClassListAdapter extends RecyclerView.Adapter<ClassListAdapter.RowViewHolder> {
   private ArrayList<RowItem> items = new ArrayList<>();
+  private View.OnClickListener clickListener;
+
+  public ClassListAdapter(View.OnClickListener clickListener) {
+    this.clickListener = clickListener;
+  }
 
   public void add(RowItem item) {
     items.add(item);
@@ -30,7 +32,8 @@ public class ClassListAdapter extends RecyclerView.Adapter<ClassListAdapter.RowV
   public RowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     int resId = R.layout.list_item_class;
     View view = LayoutInflater.from(parent.getContext()).inflate(resId, null);
-    view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+    view
+      .setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
     return new RowViewHolder(view);
   }
 
@@ -39,18 +42,16 @@ public class ClassListAdapter extends RecyclerView.Adapter<ClassListAdapter.RowV
     RowItem item = items.get(position);
     holder.textDifficulty.setText("[" + item.difficultyName + "]");
     holder.textClassName.setText(item.className);
-    holder.textReceiveAt.setText(item.displayReceiveFrom() + " " + item.receiveTimeFrom + " ~ " + item.displayReceiveTo() + " " + item.receiveTimeTo);
+    holder.textReceiveAt.setText(item.displayReceiveFrom() + " " + item.receiveTimeFrom + " ~ " + item
+      .displayReceiveTo() + " " + item.receiveTimeTo);
     holder.textEducateOn.setText(item.displayEducateFrom() + " ~ " + item.displayEducateTo());
     holder.textEducateAt.setText(item.displayDays() + " " + item.educateTimeFrom + " ~ " + item.educateTimeTo);
     holder.textSpare.setText(item.displaySpareNum() + "/" + item.displayCollectNum() + "명");
     holder.textFee.setText(item.displayEducateFee());
     holder.textRegist.setText(item.displayHowToRegist());
 
-    holder.itemView.setOnClickListener(v -> {
-      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.url));
-      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-      MyApp.context().startActivity(intent);
-    });
+    holder.itemView.setTag(item.url);
+    holder.itemView.setOnClickListener(clickListener);
   }
 
   @Override

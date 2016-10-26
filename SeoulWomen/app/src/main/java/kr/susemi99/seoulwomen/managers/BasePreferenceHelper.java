@@ -8,20 +8,17 @@ import kr.susemi99.seoulwomen.application.MyApp;
 /**
  * Created by susemi99 on 2016. 3. 5..
  */
-public class BasePreferenceHelper
-{
+public class BasePreferenceHelper {
   private SharedPreferences _sharedPreferences;
 
 
-  protected BasePreferenceHelper()
-  {
+  protected BasePreferenceHelper() {
     super();
     _sharedPreferences = MyApp.context().getSharedPreferences(MyApp.context().getPackageName(), Context.MODE_PRIVATE);
   }
 
 
-  private SharedPreferences.Editor editor()
-  {
+  private SharedPreferences.Editor editor() {
     return _sharedPreferences.edit();
   }
 
@@ -32,8 +29,7 @@ public class BasePreferenceHelper
    * @param key   키 값
    * @param value 내용
    */
-  protected void put(String key, String value)
-  {
+  protected void put(String key, String value) {
     editor().putString(key, value).commit();
   }
 
@@ -44,8 +40,7 @@ public class BasePreferenceHelper
    * @param key 키 값
    * @return String (기본값 null)
    */
-  protected String get(String key)
-  {
+  protected String get(String key) {
     return _sharedPreferences.getString(key, null);
   }
 
@@ -55,8 +50,7 @@ public class BasePreferenceHelper
    * @param key   키 값
    * @param value 내용
    */
-  protected void put(String key, int value)
-  {
+  protected void put(String key, int value) {
     editor().putInt(key, value).commit();
   }
 
@@ -68,8 +62,7 @@ public class BasePreferenceHelper
    * @param defValue 기본값
    * @return int
    */
-  protected int get(String key, int defValue)
-  {
+  protected int get(String key, int defValue) {
     return _sharedPreferences.getInt(key, defValue);
   }
 }

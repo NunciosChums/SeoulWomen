@@ -1,6 +1,10 @@
 package kr.susemi99.seoulwomen;
 
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -19,8 +23,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.util.List;
 
 import kr.susemi99.seoulwomen.adapters.ClassListAdapter;
+import kr.susemi99.seoulwomen.application.MyApp;
 import kr.susemi99.seoulwomen.listeners.EndlessRecyclerViewScrollListener;
 import kr.susemi99.seoulwomen.managers.PreferenceHelper;
 import kr.susemi99.seoulwomen.models.RowItem;
@@ -31,8 +37,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity
-{
+public class MainActivity extends AppCompatActivity {
   private static final int OFFSET = 20;
 
   private ClassListAdapter adapter;
@@ -44,14 +49,13 @@ public class MainActivity extends AppCompatActivity
   private int startIndex, endIndex;
 
   @Override
-  protected void onCreate(Bundle savedInstanceState)
-  {
+  protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-     drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+    drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
     ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
       this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
     drawer.addDrawerListener(toggle);
@@ -68,13 +72,12 @@ public class MainActivity extends AppCompatActivity
 
     areaName = PreferenceHelper.instance().lastSelectedAreaName();
     area = PreferenceHelper.instance().lastSelectedAreaValue();
-    if (TextUtils.isEmpty(areaName) || TextUtils.isEmpty(area))
-    {
+    if(TextUtils.isEmpty(areaName) || TextUtils.isEmpty(area)) {
       areaName = getString(R.string.default_area_name);
       area = getString(R.string.default_area);
     }
 
-    adapter = new ClassListAdapter();
+    adapter = new ClassListAdapter(itemClickListener);
     emptyTextView = (TextView) findViewById(android.R.id.empty);
 
     RecyclerView listView = (RecyclerView) findViewById(R.id.list);
@@ -95,90 +98,77 @@ public class MainActivity extends AppCompatActivity
   }
 
   @Override
-  public void onBackPressed()
-  {
-    if (drawer.isDrawerOpen(GravityCompat.START))
-    {
+  public void onBackPressed() {
+    if(drawer.isDrawerOpen(GravityCompat.START)) {
       drawer.closeDrawer(GravityCompat.START);
-    }
-    else
-    {
+    } else {
       super.onBackPressed();
     }
   }
 
-  private void resetIndex()
-  {
+  private void resetIndex() {
     startIndex = 1;
     endIndex = OFFSET;
     adapter.clear();
   }
 
-  private void load()
-  {
+  private void load() {
     PreferenceHelper.instance().lastSelectedAreaName(areaName);
     PreferenceHelper.instance().lastSelectedAreaValue(area);
     setTitle(areaName + " 여성인력 개발센터 교육강좌");
 
     emptyTextView.setVisibility(View.GONE);
 
-    WomenService.api().list(area, startIndex, endIndex).enqueue(new Callback<ResponseBody>()
-    {
+    WomenService.api().list(area, startIndex, endIndex).enqueue(new Callback<ResponseBody>() {
       @Override
-      public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response)
-      {
+      public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
         refreshLayout.setRefreshing(false);
 
-        try
-        {
+        try {
           String responseString = response.body().string();
           responseString = responseString.replace(area, "WomenResourcesClass");
 
           Gson gson = new GsonBuilder().create();
           WomenResourcesClassParentItem item = gson.fromJson(responseString, WomenResourcesClassParentItem.class);
 
-          if (item.classItem == null)
-          {
+          if(item.classItem == null) {
             return;
           }
 
-          if (item.classItem.rows.length == 0)
-          {
+          if(item.classItem.rows.length == 0) {
             displayErrorString(getString(R.string.no_result));
             return;
           }
 
-          for (RowItem row : item.classItem.rows)
-          {
+          for (RowItem row : item.classItem.rows) {
             adapter.add(row);
           }
           adapter.notifyDataSetChanged();
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
           e.printStackTrace();
         }
       }
 
       @Override
-      public void onFailure(Call<ResponseBody> call, Throwable t)
-      {
+      public void onFailure(Call<ResponseBody> call, Throwable t) {
         refreshLayout.setRefreshing(false);
         displayErrorString(t.getLocalizedMessage());
       }
     });
   }
 
-  private void displayErrorString(String string)
-  {
+  private void displayErrorString(String string) {
     emptyTextView.setText(string);
     emptyTextView.setVisibility(View.VISIBLE);
   }
 
-  private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = new NavigationView.OnNavigationItemSelectedListener()
-  {
+
+  /*******************
+   * listener
+   *******************/
+  private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = new NavigationView.OnNavigationItemSelectedListener() {
     @Override
-    public boolean onNavigationItemSelected(MenuItem item)
-    {
+    public boolean onNavigationItemSelected(MenuItem item) {
       drawer.closeDrawer(GravityCompat.START);
 
       areaName = item.getTitle().toString();
@@ -190,21 +180,21 @@ public class MainActivity extends AppCompatActivity
     }
   };
 
-//  private AdapterView.OnItemClickListener itemClickListener = (parent, view, position, id) -> {
-//    RowItem item = (RowItem) parent.getItemAtPosition(position);
-//    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.url));
-//    startActivity(intent);
-//  };
-//
-//  private EndlessScrollListener endlessScrollListener = new EndlessScrollListener()
-//  {
-//    @Override
-//    public boolean onLoadMore(int page, int totalItemsCount)
-//    {
-//      startIndex = endIndex + 1;
-//      endIndex += OFFSET;
-//      load();
-//      return true;
-//    }
-//  };
+  private View.OnClickListener itemClickListener = view -> {
+    String url = (String) view.getTag();
+    String PACKAGE_NAME = "com.android.chrome";
+
+    CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().setShowTitle(true).build();
+    customTabsIntent.intent.setData(Uri.parse(url));
+
+    List<ResolveInfo> resolveInfoList = MyApp.context().getPackageManager()
+                                             .queryIntentActivities(customTabsIntent.intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+    for (ResolveInfo resolveInfo : resolveInfoList) {
+      if(PACKAGE_NAME.equals(resolveInfo.activityInfo.packageName))
+        customTabsIntent.intent.setPackage(PACKAGE_NAME);
+    }
+
+    customTabsIntent.launchUrl(MainActivity.this, Uri.parse(url));
+  };
 }
