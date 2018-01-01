@@ -52,19 +52,18 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-      this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+    drawer = findViewById(R.id.drawer_layout);
+    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
     drawer.addDrawerListener(toggle);
     toggle.syncState();
 
-    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+    NavigationView navigationView = findViewById(R.id.nav_view);
     navigationView.setNavigationItemSelectedListener(navigationItemSelectedListener);
 
-    refreshLayout = (SwipeRefreshLayout) findViewById(R.id.layout_refresh);
+    refreshLayout = findViewById(R.id.layout_refresh);
     refreshLayout.setOnRefreshListener(() -> {
       resetIndex();
       load();
@@ -72,16 +71,16 @@ public class MainActivity extends AppCompatActivity {
 
     areaName = PreferenceHelper.instance().lastSelectedAreaName();
     area = PreferenceHelper.instance().lastSelectedAreaValue();
-    if(TextUtils.isEmpty(areaName) || TextUtils.isEmpty(area)) {
+    if (TextUtils.isEmpty(areaName) || TextUtils.isEmpty(area)) {
       areaName = getString(R.string.default_area_name);
       area = getString(R.string.default_area);
     }
 
     adapter = new ClassListAdapter(itemClickListener);
-    emptyTextView = (TextView) findViewById(android.R.id.empty);
+    emptyTextView = findViewById(android.R.id.empty);
 
-    RecyclerView listView = (RecyclerView) findViewById(R.id.list);
-    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+    RecyclerView listView = findViewById(R.id.list);
+    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
     listView.setLayoutManager(linearLayoutManager);
     listView.setAdapter(adapter);
     listView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -99,9 +98,10 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   public void onBackPressed() {
-    if(drawer.isDrawerOpen(GravityCompat.START)) {
+    if (drawer.isDrawerOpen(GravityCompat.START)) {
       drawer.closeDrawer(GravityCompat.START);
-    } else {
+    }
+    else {
       super.onBackPressed();
     }
   }
@@ -131,11 +131,7 @@ public class MainActivity extends AppCompatActivity {
           Gson gson = new GsonBuilder().create();
           WomenResourcesClassParentItem item = gson.fromJson(responseString, WomenResourcesClassParentItem.class);
 
-          if(item.classItem == null) {
-            return;
-          }
-
-          if(item.classItem.rows.length == 0) {
+          if (item == null || item.classItem == null || item.classItem.rows.length == 0) {
             displayErrorString(getString(R.string.no_result));
             return;
           }
@@ -188,13 +184,12 @@ public class MainActivity extends AppCompatActivity {
     customTabsIntent.intent.setData(Uri.parse(url));
 
     List<ResolveInfo> resolveInfoList = MyApp.context().getPackageManager()
-                                             .queryIntentActivities(customTabsIntent.intent, PackageManager.MATCH_DEFAULT_ONLY);
+      .queryIntentActivities(customTabsIntent.intent, PackageManager.MATCH_DEFAULT_ONLY);
 
     for (ResolveInfo resolveInfo : resolveInfoList) {
-      if(PACKAGE_NAME.equals(resolveInfo.activityInfo.packageName))
-        customTabsIntent.intent.setPackage(PACKAGE_NAME);
+      if (PACKAGE_NAME.equals(resolveInfo.activityInfo.packageName)) { customTabsIntent.intent.setPackage(PACKAGE_NAME); }
     }
 
-    customTabsIntent.launchUrl(MainActivity.this, Uri.parse(url));
+    customTabsIntent.launchUrl(getApplicationContext(), Uri.parse(url));
   };
 }
