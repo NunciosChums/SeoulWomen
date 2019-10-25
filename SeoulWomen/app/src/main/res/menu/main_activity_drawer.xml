@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  tools:showIn="navigation_view">
+
+  <group android:checkableBehavior="single">
+    <item
+      android:title="장애"
+      android:titleCondensed="SeoulDisableWomenResourcesClass" />
+    <item
+      android:title="동작"
+      android:titleCondensed="SeoulDongjakWomenResourcesClass" />
+    <item
+      android:title="서초"
+      android:titleCondensed="SeoulSeochoWomenResourcesClass" />
+    <item
+      android:title="성동"
+      android:titleCondensed="SeoulSeongdongWomenResourcesClass" />
+    <item
+      android:title="송파"
+      android:titleCondensed="SeoulSongpaWomenResourcesClass" />
+    <item
+      android:title="용산"
+      android:titleCondensed="SeoulYongSanWomenResourcesClass" />
+    <item
+      android:title="중랑"
+      android:titleCondensed="SeoulJungNangWomenResourcesClass" />
+  </group>
+
+</menu>
