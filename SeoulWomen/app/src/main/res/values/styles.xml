@@ -20,7 +20,7 @@
   </style>
 
   <style name="classRowValue">
-    <item name="android:layout_columnWeight">1</item>
+    <item name="android:layout_width">match_parent</item>
     <item name="android:textAppearance">?android:textAppearanceListItem</item>
     <item name="android:layout_marginTop">5dp</item>
   </style>
