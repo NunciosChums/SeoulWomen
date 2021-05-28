@@ -10,9 +10,9 @@ import kr.susemi99.seoulwomen.application.App
 object AppPreference : KotprefModel() {
   /**
    * 마지막 선택한 지역 이름(중랑, 강남...)
-   * 기본: 장애
+   * 기본: 장애 여성인력개발센터
    */
-  var lastSelectedAreaName by stringPref(App.instance.getString(R.string.default_area_name))
+  var lastSelectedAreaNameV2 by stringPref(App.instance.getString(R.string.default_area_name))
 
   /**
    * 마지막 선택한 지역 값(JungNang, GangNam...)

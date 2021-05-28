@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     binding.navView.setNavigationItemSelectedListener { menuItem ->
       binding.drawerLayout.closeDrawers()
-      AppPreference.lastSelectedAreaName = menuItem.title.toString()
+      AppPreference.lastSelectedAreaNameV2 = menuItem.title.toString()
       AppPreference.lastSelectedAreaValue = menuItem.titleCondensed.toString()
       reset()
       true
@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun loadData() {
-    title = "${AppPreference.lastSelectedAreaName} 여성인력 개발센터"
+    title = AppPreference.lastSelectedAreaNameV2
 
     WomenService.list(startIndex, endIndex)
       .subscribe(

@@ -5,6 +5,6 @@
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
 
-  <string name="default_area_name">장애</string>
+  <string name="default_area_name">장애 여성인력개발센터</string>
   <string name="default_area_value">SeoulDisableWomenResourcesClass</string>
 </resources>
