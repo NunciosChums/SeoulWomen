@@ -1,8 +1,9 @@
-package kr.susemi99.seoulwomen.network
+package kr.susemi99.seoulwomen.api
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kr.susemi99.seoulwomen.BuildConfig
 import kr.susemi99.seoulwomen.R
 import kr.susemi99.seoulwomen.application.App
@@ -11,7 +12,6 @@ import kr.susemi99.seoulwomen.util.AppPreference
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -30,7 +30,7 @@ object WomenService {
     }
 
     return Retrofit.Builder()
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
       .baseUrl(HOST)
       .client(builder.build())

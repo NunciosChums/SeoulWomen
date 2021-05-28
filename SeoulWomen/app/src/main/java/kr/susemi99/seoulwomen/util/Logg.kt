@@ -6,42 +6,60 @@ import android.util.Log
  * 로그 표시용
  */
 object Logg {
-  private fun formattedMessage(): String {
-    val level = 4
-    val trace = Thread.currentThread().stackTrace[level]
-    val fileName = trace.fileName
-    val classPath = trace.className
-    val className = classPath.substring(classPath.lastIndexOf(".") + 1)
-    val methodName = trace.methodName
-    val lineNumber = trace.lineNumber
-    return "$className.$methodName($fileName:$lineNumber)"
+  private fun tag(): String? {
+    return Thread.currentThread().stackTrace[4].let {
+      val link = "(${it.fileName}:${it.lineNumber})"
+      val path = "App# ${it.className.substringAfterLast(".")}.${it.methodName}"
+      if (path.length + link.length > 80) {
+        "${path.take(80 - link.length)}...${link}"
+      } else {
+        "${path}${link}"
+      }
+    }
   }
 
-  fun v(tag: String, msg: String?) {
-    Log.v(tag, formattedMessage() + "|" + msg)
+  fun v(msg: String?) {
+    Log.v(tag(), "💜 $msg")
   }
 
-  fun d(tag: String, msg: String?) {
-    Log.d(tag, formattedMessage() + "|" + msg)
+  fun d(msg: String?) {
+    Log.d(tag(), "💙 $msg")
   }
 
-  fun i(tag: String, msg: String?) {
-    Log.i(tag, formattedMessage() + "|" + msg)
+  fun i(msg: String?) {
+    Log.i(tag(), "💚 $msg")
   }
 
-  fun w(tag: String, msg: String?) {
-    Log.w(tag, formattedMessage() + "|" + msg)
+  fun w(msg: String?) {
+    Log.w(tag(), "💛 $msg")
   }
 
-  fun w(tag: String, e: Throwable) {
-    Log.w(tag, formattedMessage() + "|" + e.toString())
+  fun w(e: Throwable?) {
+    Log.w(tag(), "💛 ${e?.localizedMessage}")
+    e?.printStackTrace()
   }
 
-  fun w(tag: String, e: Exception) {
-    Log.w(tag, formattedMessage() + "|" + e.toString())
+  fun w(e: Exception?) {
+    Log.w(tag(), "💛 ${e?.localizedMessage}")
+    e?.printStackTrace()
   }
 
-  fun e(tag: String, msg: String?) {
-    Log.e(tag, formattedMessage() + "|" + msg)
+  fun w(e: LinkageError?) {
+    Log.w(tag(), "💛 ${e?.localizedMessage}")
+    e?.printStackTrace()
+  }
+
+  fun e(msg: String?) {
+    Log.e(tag(), "💔 $msg")
+  }
+
+  fun e(e: Throwable?) {
+    Log.e(tag(), "💔 ${e?.localizedMessage}")
+    e?.printStackTrace()
+  }
+
+  fun e(e: java.lang.Exception?) {
+    Log.e(tag(), "💔 ${e?.localizedMessage}")
+    e?.printStackTrace()
   }
 }

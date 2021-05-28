@@ -7,12 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.class_list_item.view.*
-import kr.susemi99.seoulwomen.R
 import kr.susemi99.seoulwomen.application.App
+import kr.susemi99.seoulwomen.databinding.ClassListItemBinding
 import kr.susemi99.seoulwomen.model.RowItem
 
 class ClassListAdapter : RecyclerView.Adapter<ClassListAdapter.AppViewHolder>() {
+  private lateinit var binding: ClassListItemBinding
+
   private val items = arrayListOf<RowItem>()
 
   fun addAll(rowItems: List<RowItem>) {
@@ -26,7 +27,8 @@ class ClassListAdapter : RecyclerView.Adapter<ClassListAdapter.AppViewHolder>() 
   }
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {
-    return AppViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.class_list_item, parent, false))
+    binding = ClassListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    return AppViewHolder(binding.root)
   }
 
   override fun getItemCount(): Int {
@@ -48,14 +50,14 @@ class ClassListAdapter : RecyclerView.Adapter<ClassListAdapter.AppViewHolder>() 
   inner class AppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(item: RowItem) {
       itemView.apply {
-        difficultyLabel.text = "[${item.difficultyName}]"
-        classNameLabel.text = item.className
-        receiveAtLabel.text = "${item.displayReceiveFrom()} ${item.receiveTimeFrom} ~\n${item.displayReceiveTo()} ${item.receiveTimeTo}"
-        educateOnLabel.text = "${item.displayEducateFrom()} ~\n${item.displayEducateTo()}"
-        educateAtLabel.text = "${item.displayDays()}\n${item.educateTimeFrom} ~ ${item.educateTimeTo}"
-        spareLabel.text = "${item.displaySpareNum()}/${item.displayCollectNum()}명"
-        feeLabel.text = "${item.displayEducateFee()}"
-        howToRegistLabel.text = "${item.displayHowToRegist()}"
+        binding.difficultyLabel.text = "[${item.difficultyName}]"
+        binding.classNameLabel.text = item.className
+        binding.receiveAtLabel.text = "${item.displayReceiveFrom()} ${item.receiveTimeFrom} ~\n${item.displayReceiveTo()} ${item.receiveTimeTo}"
+        binding.educateOnLabel.text = "${item.displayEducateFrom()} ~\n${item.displayEducateTo()}"
+        binding.educateAtLabel.text = "${item.displayDays()}\n${item.educateTimeFrom} ~ ${item.educateTimeTo}"
+        binding.spareLabel.text = "${item.displaySpareNum()}/${item.displayCollectNum()}명"
+        binding.feeLabel.text = "${item.displayEducateFee()}"
+        binding.howToRegistLabel.text = "${item.displayHowToRegist()}"
       }
     }
   }

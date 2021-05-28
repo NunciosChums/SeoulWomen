@@ -31,3 +31,4 @@ proguard/
 # Android Studio captures folder
 captures/
 string_key.xml
+.DS_Store

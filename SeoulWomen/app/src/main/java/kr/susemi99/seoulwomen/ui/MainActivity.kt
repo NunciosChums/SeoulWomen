@@ -11,17 +11,17 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.android.synthetic.main.main_app_bar.*
-import kotlinx.android.synthetic.main.main_content.*
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import kr.susemi99.seoulwomen.R
+import kr.susemi99.seoulwomen.api.WomenService
 import kr.susemi99.seoulwomen.application.App
-import kr.susemi99.seoulwomen.network.WomenService
+import kr.susemi99.seoulwomen.databinding.MainActivityBinding
 import kr.susemi99.seoulwomen.util.AppPreference
 
 class MainActivity : AppCompatActivity() {
+  private lateinit var binding: MainActivityBinding
+
   companion object {
     const val OFFSET = 20
   }
@@ -29,26 +29,29 @@ class MainActivity : AppCompatActivity() {
   private val classListAdapter = ClassListAdapter()
   private var startIndex = 1
   private var endIndex = OFFSET
-  private val disposable = CompositeDisposable()
+  private val disposableBag = CompositeDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.main_activity)
-    setSupportActionBar(toolbar)
+    binding = MainActivityBinding.inflate(layoutInflater).also {
+      setContentView(it.root)
+    }
 
-    val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-    drawerLayout.addDrawerListener(toggle)
+    setSupportActionBar(binding.toolbar)
+
+    val toggle = ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+    binding.drawerLayout.addDrawerListener(toggle)
     toggle.syncState()
 
-    navView.setNavigationItemSelectedListener { menuItem ->
-      drawerLayout.closeDrawers()
+    binding.navView.setNavigationItemSelectedListener { menuItem ->
+      binding.drawerLayout.closeDrawers()
       AppPreference.lastSelectedAreaName = menuItem.title.toString()
       AppPreference.lastSelectedAreaValue = menuItem.titleCondensed.toString()
       reset()
       true
     }
 
-    classListView.apply {
+    binding.classListView.apply {
       adapter = classListAdapter
 
       val currentLayoutManager = layoutManager as LinearLayoutManager
@@ -67,8 +70,8 @@ class MainActivity : AppCompatActivity() {
   }
 
   override fun onBackPressed() {
-    if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-      drawerLayout.closeDrawers()
+    if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+      binding.drawerLayout.closeDrawers()
     } else {
       super.onBackPressed()
     }
@@ -76,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 
   override fun onDestroy() {
     super.onDestroy()
-    disposable.clear()
+    disposableBag.clear()
   }
 
   override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -95,9 +98,9 @@ class MainActivity : AppCompatActivity() {
   private fun reset() {
     startIndex = 1
     endIndex = OFFSET
-    errorLabel.isGone = true
+    binding.errorLabel.isGone = true
     classListAdapter.clear()
-    disposable.clear()
+    disposableBag.clear()
 
     loadData()
   }
@@ -121,11 +124,11 @@ class MainActivity : AppCompatActivity() {
             displayErrorLabel(it.localizedMessage)
           }
         }
-      ).addTo(disposable)
+      ).addTo(disposableBag)
   }
 
   private fun displayErrorLabel(string: String? = getString(R.string.no_result)) {
-    errorLabel.apply {
+    binding.errorLabel.apply {
       text = string
       isVisible = true
     }

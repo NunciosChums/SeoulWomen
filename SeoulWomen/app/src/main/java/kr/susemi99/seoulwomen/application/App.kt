@@ -1,10 +1,10 @@
 package kr.susemi99.seoulwomen.application
 
 import android.app.Application
-import android.util.Log
 import com.chibatching.kotpref.Kotpref
-import com.uber.rxdogtag.RxDogTag
-import io.reactivex.plugins.RxJavaPlugins
+import io.reactivex.rxjava3.plugins.RxJavaPlugins
+import kr.susemi99.seoulwomen.util.Logg
+import rxdogtag2.RxDogTag
 
 class App : Application() {
   companion object {
@@ -18,6 +18,6 @@ class App : Application() {
 
     Kotpref.init(applicationContext)
     RxDogTag.install()
-    RxJavaPlugins.setErrorHandler { Log.w("APP#", it) }
+    RxJavaPlugins.setErrorHandler { Logg.w(it) }
   }
 }
