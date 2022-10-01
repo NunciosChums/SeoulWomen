@@ -30,5 +30,6 @@ proguard/
 
 # Android Studio captures folder
 captures/
-string_key.xml
 .DS_Store
+SeoulWomen/.idea/deploymentTargetDropDown.xml
+request_key.txt

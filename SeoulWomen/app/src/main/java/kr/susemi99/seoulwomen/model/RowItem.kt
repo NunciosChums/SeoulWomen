@@ -1,74 +1,119 @@
 package kr.susemi99.seoulwomen.model
 
-import com.google.gson.annotations.SerializedName
-import kr.susemi99.seoulwomen.extension.toCommaString
-import kr.susemi99.seoulwomen.util.DateFormatter
-import kr.susemi99.seoulwomen.util.DateFormatter.YEAR_MONTH_DAY1
-import kr.susemi99.seoulwomen.util.DateFormatter.YEAR_MONTH_DAY2
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kr.susemi99.seoulwomen.extension.comma
+import kr.susemi99.seoulwomen.extension.dayName
+import java.time.LocalDate
+import java.time.LocalTime
 
+@Serializable
 data class RowItem(
-  @SerializedName("CLASS_CODE") val classCode: String,
-  @SerializedName("CLASS_NAME") val className: String,
-  @SerializedName("ORGAN_CODE") val organCode: String,
-  @SerializedName("ORGAN_NAME") val organName: String,
-  @SerializedName("DIFFICULTY") val difficulty: String,
-  @SerializedName("DIFFICULTY_NAME") val difficultyName: String,
-  @SerializedName("RECEIVE_FROM") val receiveFrom: String,
-  @SerializedName("RECEIVE_TO") val receiveTo: String,
-  @SerializedName("RECEIVE_TIME_FROM") val receiveTimeFrom: String,
-  @SerializedName("RECEIVE_TIME_TO") val receiveTimeTo: String,
-  @SerializedName("EDUCATE_FROM") val educateFrom: String,
-  @SerializedName("EDUCATE_TO") val educateTo: String,
-  @SerializedName("EDUCATE_TIME_FROM") val educateTimeFrom: String,
-  @SerializedName("EDUCATE_TIME_TO") val educateTimeTo: String,
-  @SerializedName("MONDAY") val monday: String?,
-  @SerializedName("TUESDAY") val tuesday: String?,
-  @SerializedName("WEDNESDAY") val wednesday: String?,
-  @SerializedName("THURSDAY") val thursday: String?,
-  @SerializedName("FRIDAY") val friday: String?,
-  @SerializedName("SATURDAY") val saturday: String?,
-  @SerializedName("SUNDAY") val sunday: String?,
-  @SerializedName("COLLECT_NUM") val collectNum: String,
-  @SerializedName("SPARE_NUM") val spareNum: String,
-  @SerializedName("EDUCATE_FEE") val educateFee: String,
-  @SerializedName("VISIT_RECEIVE_FLAG") val visitReceiveFlag: String,
-  @SerializedName("ONLINE_RECEIVE_FLAG") val onlineReceiveFlag: String,
-  @SerializedName("URL") val url: String
+  @SerialName("CLASS_CODE") val classCode: String,
+  @SerialName("CLASS_NAME") val className: String,
+  @SerialName("ORGAN_CODE") val organCode: String,
+  @SerialName("ORGAN_NAME") val organName: String,
+  @SerialName("DIFFICULTY") val difficultyCode: String,
+  @SerialName("DIFFICULTY_NAME") val difficultyName: String,
+  @Contextual @SerialName("RECEIVE_FROM") val receiveFrom: LocalDate,
+  @Contextual @SerialName("RECEIVE_TO") val receiveTo: LocalDate,
+  @Contextual @SerialName("RECEIVE_TIME_FROM") val receiveTimeFrom: LocalTime,
+  @Contextual @SerialName("RECEIVE_TIME_TO") val receiveTimeTo: LocalTime,
+  @Contextual @SerialName("EDUCATE_FROM") val educateFrom: LocalDate,
+  @Contextual @SerialName("EDUCATE_TO") val educateTo: LocalDate,
+  @Contextual @SerialName("EDUCATE_TIME_FROM") val educateTimeFrom: LocalTime,
+  @Contextual @SerialName("EDUCATE_TIME_TO") val educateTimeTo: LocalTime,
+  @SerialName("MONDAY") val monday: String?,
+  @SerialName("TUESDAY") val tuesday: String?,
+  @SerialName("WEDNESDAY") val wednesday: String?,
+  @SerialName("THURSDAY") val thursday: String?,
+  @SerialName("FRIDAY") val friday: String?,
+  @SerialName("SATURDAY") val saturday: String?,
+  @SerialName("SUNDAY") val sunday: String?,
+  @SerialName("COLLECT_NUM") val collectNum: Float,
+  @SerialName("SPARE_NUM") val spareNum: Float,
+  @SerialName("EDUCATE_FEE") val educateFee: Float,
+  @SerialName("VISIT_RECEIVE_FLAG") val visitReceiveFlag: String,
+  @SerialName("ONLINE_RECEIVE_FLAG") val onlineReceiveFlag: String,
+  @SerialName("URL") val url: String
 ) {
+  /**
+   * 난이도
+   */
+  val difficulty
+    get() = "[${difficultyName}]"
 
-  fun displayReceiveFrom() = DateFormatter.format(receiveFrom, YEAR_MONTH_DAY1, YEAR_MONTH_DAY2)
-  fun displayReceiveTo() = DateFormatter.format(receiveTo, YEAR_MONTH_DAY1, YEAR_MONTH_DAY2)
-  fun displayEducateFrom() = DateFormatter.format(educateFrom, YEAR_MONTH_DAY1, YEAR_MONTH_DAY2)
-  fun displayEducateTo() = DateFormatter.format(educateTo, YEAR_MONTH_DAY1, YEAR_MONTH_DAY2)
-  fun displaySpareNum() = spareNum.toCommaString()
-  fun displayCollectNum() = collectNum.toCommaString()
-
-  fun displayDays(): String {
-    val builder = StringBuilder()
-    if (!monday.isNullOrBlank()) builder.append("월")
-    if (!tuesday.isNullOrBlank()) builder.append("화")
-    if (!wednesday.isNullOrBlank()) builder.append("수")
-    if (!thursday.isNullOrBlank()) builder.append("목")
-    if (!friday.isNullOrBlank()) builder.append("금")
-    if (!saturday.isNullOrBlank()) builder.append("토")
-    if (!sunday.isNullOrBlank()) builder.append("일")
-    return builder.toString()
-  }
-
-  fun displayEducateFee() = if (educateFee.toFloat() > 0f) {
-    "${educateFee.toCommaString()}원"
-  } else {
-    "무료"
-  }
-
-  fun displayHowToRegist(): String {
-    val result = arrayListOf<String>()
-    if (visitReceiveFlag == "Y") {
-      result.add("방문")
+  /**
+   * 신청 기간
+   */
+  val receivePeriod
+    get() = if (receiveFrom == receiveTo) {
+      "$receiveFrom(${receiveFrom.dayName}) $receiveTimeFrom ~ $receiveTimeTo"
+    } else {
+      "$receiveFrom(${receiveFrom.dayName}) $receiveTimeFrom ~\n$receiveTo(${receiveTo.dayName}) $receiveTimeTo"
     }
-    if (onlineReceiveFlag == "Y") {
-      result.add("온라인")
+
+  /**
+   * 교육 기간
+   */
+  val educatePeriod
+    get() = if (educateFrom == educateTo) {
+      "$educateFrom(${educateFrom.dayName})"
+    } else {
+      "$educateFrom(${educateFrom.dayName}) ~ $educateTo(${educateTo.dayName})"
     }
-    return result.joinToString(", ")
-  }
+
+  /**
+   * 교육 요일, 시간
+   */
+  val educateDays
+    get() = if (educateFrom == educateTo) {
+      educateTime
+    } else {
+      StringBuilder().apply {
+        append("\n")
+        if (!monday.isNullOrBlank()) append("월")
+        if (!tuesday.isNullOrBlank()) append("화")
+        if (!wednesday.isNullOrBlank()) append("수")
+        if (!thursday.isNullOrBlank()) append("목")
+        if (!friday.isNullOrBlank()) append("금")
+        if (!saturday.isNullOrBlank()) append("토")
+        if (!sunday.isNullOrBlank()) append("일")
+        append("\n")
+        append(educateTime)
+      }.toString()
+    }
+
+  /**
+   * 교육 시간
+   */
+  private val educateTime
+    get() = "$educateTimeFrom ~ $educateTimeTo"
+
+  /**
+   * 잔여
+   */
+  val remainNumber
+    get() = "${spareNum.toInt()}/${collectNum.toInt()}명"
+
+  /**
+   * 수강료
+   */
+  val fee
+    get() = if (educateFee > 0f) {
+      "${educateFee.comma}원"
+    } else {
+      "무료"
+    }
+
+  /**
+   * 접수 방법
+   */
+  val howToRegister
+    get() = mutableListOf<String>().apply {
+      if (visitReceiveFlag == "Y") add("방문")
+      if (onlineReceiveFlag == "Y") add("온라인")
+      if (listOf(visitReceiveFlag, onlineReceiveFlag).all { it == "N" }) add("접수방법 확인")
+    }.joinToString()
 }

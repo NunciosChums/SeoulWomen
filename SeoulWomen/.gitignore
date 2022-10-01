@@ -12,4 +12,4 @@
 /captures
 .externalNativeBuild
 .cxx
-string_key.xml
+local.properties
