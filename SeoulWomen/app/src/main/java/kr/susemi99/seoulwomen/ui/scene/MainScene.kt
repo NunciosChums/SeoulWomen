@@ -2,16 +2,20 @@ package kr.susemi99.seoulwomen.ui.scene
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -36,42 +40,75 @@ fun MainScene() {
   val listItems = viewModel.list.collectAsLazyPagingItems()
   val coroutineScope = rememberCoroutineScope()
   val context = LocalContext.current
+  val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
 
-  Scaffold(topBar = {
-    TopAppBar(
-      title = { Text(text = stringResource(id = R.string.app_name)) },
-      actions = {
-        IconButton(onClick = {
-          listItems.refresh()
-          coroutineScope.launch {
-            scrollState.scrollToItem(0)
-          }
-        }) {
-          Icon(imageVector = Icons.Default.Refresh, contentDescription = "refresh")
+  fun closeDrawer() {
+    coroutineScope.launch { drawerState.close() }
+  }
+
+  fun openDrawer() {
+    coroutineScope.launch { drawerState.open() }
+  }
+
+  fun toggleDrawer() {
+    coroutineScope.launch { if (drawerState.isOpen) drawerState.close() else drawerState.open() }
+  }
+
+  ModalNavigationDrawer(
+    drawerContent = {
+      Column(
+        modifier = Modifier
+          .width(100.dp)
+          .fillMaxHeight()
+          .background(Color.Gray)
+      ) {
+        TextButton(modifier = Modifier.fillMaxWidth(), shape = RectangleShape, onClick = { closeDrawer() }) {
+          Text(text = "aaa")
         }
-      })
-  }) { paddingValues ->
-    if (listItems.itemCount == 0 && listItems.loadState.prepend.endOfPaginationReached) {
-      NoResultView()
-    } else {
-      LazyColumn(state = scrollState, modifier = Modifier.padding(paddingValues)) {
-        items(listItems) {
-          Column(modifier = Modifier
-            .clickable { Intent(Intent.ACTION_VIEW, Uri.parse(it?.url)).also { context.startActivity(it) } }
-            .padding(10.dp)) {
-            Text(
-              buildAnnotatedString {
-                withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 16.sp)) { append("${it?.difficulty} ") }
-                withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 20.sp)) { append("${it?.className}") }
-              }
-            )
-            RowView("신청기간", "${it?.receivePeriod}")
-            RowView("교육기간", "${it?.educatePeriod} ${it?.educateDays}")
-            RowView("잔여", "${it?.remainNumber}")
-            RowView("수강료", "${it?.fee}")
-            RowView("접수", "${it?.howToRegister}")
+      }
+    }, drawerState = drawerState
+  ) {
+    Scaffold(topBar = {
+      TopAppBar(
+        title = { Text(text = stringResource(id = R.string.app_name)) },
+        actions = {
+          IconButton(onClick = {
+            listItems.refresh()
+            coroutineScope.launch {
+              scrollState.scrollToItem(0)
+            }
+          }) {
+            Icon(imageVector = Icons.Default.Refresh, contentDescription = "refresh")
           }
-          Divider()
+        },
+        navigationIcon = {
+          IconButton(onClick = { openDrawer() }) {
+            Icon(Icons.Default.Add, contentDescription = "home icon")
+          }
+        })
+    }) { paddingValues ->
+      if (listItems.itemCount == 0 && listItems.loadState.prepend.endOfPaginationReached) {
+        NoResultView()
+      } else {
+        LazyColumn(state = scrollState, modifier = Modifier.padding(paddingValues)) {
+          items(listItems) {
+            Column(modifier = Modifier
+              .clickable { Intent(Intent.ACTION_VIEW, Uri.parse(it?.url)).also { context.startActivity(it) } }
+              .padding(10.dp)) {
+              Text(
+                buildAnnotatedString {
+                  withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 16.sp)) { append("${it?.difficulty} ") }
+                  withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 20.sp)) { append("${it?.className}") }
+                }
+              )
+              RowView("신청기간", "${it?.receivePeriod}")
+              RowView("교육기간", "${it?.educatePeriod} ${it?.educateDays}")
+              RowView("잔여", "${it?.remainNumber}")
+              RowView("수강료", "${it?.fee}")
+              RowView("접수", "${it?.howToRegister}")
+            }
+            Divider()
+          }
         }
       }
     }
