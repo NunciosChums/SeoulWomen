@@ -4,13 +4,13 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import kr.susemi99.seoulwomen.api.Api
 import kr.susemi99.seoulwomen.model.RowItem
-import kr.susemi99.seoulwomen.util.preference.AppPreference
 
 class ItemPagingSource constructor(
   private val api: Api,
-  private val appPreference: AppPreference
+  private val areaClassName: String,
 ) : PagingSource<Int, RowItem>() {
   private val itemsPerPage = 30
+  private var prevAreaClassName: String? = null
 
   override fun getRefreshKey(state: PagingState<Int, RowItem>): Int? {
     return state.anchorPosition?.let { anchorPosition ->
@@ -20,10 +20,14 @@ class ItemPagingSource constructor(
   }
 
   override suspend fun load(params: LoadParams<Int>): LoadResult<Int, RowItem> {
-    val nextPage = params.key ?: itemsPerPage
-    val currentPage = nextPage - itemsPerPage
-//    val result = api.list(startIndex = currentPage, endIndex = nextPage, areaValue = "SeoulJungNangWomenResourcesClass")
-    val result = api.list(startIndex = currentPage, endIndex = nextPage, areaValue = appPreference.lastSelectedAreaValue)
+    var nextPage = params.key ?: itemsPerPage
+    var currentPage = nextPage - itemsPerPage
+    if (prevAreaClassName != areaClassName) {
+      prevAreaClassName = areaClassName
+      nextPage = itemsPerPage
+      currentPage = 0
+    }
+    val result = api.list(startIndex = currentPage, endIndex = nextPage, areaValue = areaClassName)
 
     return try {
       LoadResult.Page(

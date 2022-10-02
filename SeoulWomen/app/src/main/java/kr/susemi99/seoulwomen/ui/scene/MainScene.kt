@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,6 +30,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.launch
 import kr.susemi99.seoulwomen.R
+import kr.susemi99.seoulwomen.enums.Area
 import kr.susemi99.seoulwomen.ui.theme.RowTitleColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,52 +39,50 @@ fun MainScene() {
   val viewModel = viewModel<MainViewModel>()
   val scrollState = rememberLazyListState()
   val listItems = viewModel.list.collectAsLazyPagingItems()
-  val coroutineScope = rememberCoroutineScope()
+  val scope = rememberCoroutineScope()
   val context = LocalContext.current
-  val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
+  val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
   fun closeDrawer() {
-    coroutineScope.launch { drawerState.close() }
+    scope.launch { drawerState.close() }
   }
 
   fun openDrawer() {
-    coroutineScope.launch { drawerState.open() }
-  }
-
-  fun toggleDrawer() {
-    coroutineScope.launch { if (drawerState.isOpen) drawerState.close() else drawerState.open() }
+    scope.launch { drawerState.open() }
   }
 
   ModalNavigationDrawer(
     drawerContent = {
-      Column(
-        modifier = Modifier
-          .width(100.dp)
-          .fillMaxHeight()
-          .background(Color.Gray)
-      ) {
-        TextButton(modifier = Modifier.fillMaxWidth(), shape = RectangleShape, onClick = { closeDrawer() }) {
-          Text(text = "aaa")
+      DrawerMenuList {
+        closeDrawer()
+        if (it.title != viewModel.title) {
+          scope.launch {
+            scrollState.scrollToItem(index = 0)
+            viewModel.selectedArea(it) {
+              listItems.refresh()
+            }
+          }
         }
       }
-    }, drawerState = drawerState
+    },
+    drawerState = drawerState
   ) {
     Scaffold(topBar = {
       TopAppBar(
-        title = { Text(text = stringResource(id = R.string.app_name)) },
+        title = { Text(text = viewModel.title) },
         actions = {
           IconButton(onClick = {
             listItems.refresh()
-            coroutineScope.launch {
+            scope.launch {
               scrollState.scrollToItem(0)
             }
           }) {
-            Icon(imageVector = Icons.Default.Refresh, contentDescription = "refresh")
+            Icon(imageVector = Icons.Rounded.Refresh, contentDescription = "refresh")
           }
         },
         navigationIcon = {
           IconButton(onClick = { openDrawer() }) {
-            Icon(Icons.Default.Add, contentDescription = "home icon")
+            Icon(Icons.Rounded.Menu, contentDescription = "home icon")
           }
         })
     }) { paddingValues ->
@@ -93,6 +92,7 @@ fun MainScene() {
         LazyColumn(state = scrollState, modifier = Modifier.padding(paddingValues)) {
           items(listItems) {
             Column(modifier = Modifier
+              .fillMaxWidth()
               .clickable { Intent(Intent.ACTION_VIEW, Uri.parse(it?.url)).also { context.startActivity(it) } }
               .padding(10.dp)) {
               Text(
@@ -157,4 +157,21 @@ fun RowValue(text: String) {
     fontSize = 16.sp,
     fontWeight = FontWeight.Normal
   )
+}
+
+@Composable
+fun DrawerMenuList(onSelected: (Area) -> Unit) {
+  Column(
+    modifier = Modifier
+      .width(300.dp)
+      .fillMaxHeight()
+      .background(Color.Gray)
+  ) {
+    Area.values().forEach {
+      TextButton(modifier = Modifier.fillMaxWidth(), shape = RectangleShape, onClick = { onSelected(it) }) {
+        Text(text = it.title, fontSize = 20.sp)
+      }
+      Divider()
+    }
+  }
 }
