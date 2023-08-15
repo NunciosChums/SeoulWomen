@@ -9,11 +9,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
@@ -27,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import kr.susemi99.seoulwomen.R
 import kr.susemi99.seoulwomen.enums.Area
@@ -41,7 +43,7 @@ fun MainScene() {
   val listItems = viewModel.list.collectAsLazyPagingItems()
   val scope = rememberCoroutineScope()
   val context = LocalContext.current
-  val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+  val drawerState = rememberDrawerState(DrawerValue.Closed)
 
   fun closeDrawer() {
     scope.launch { drawerState.close() }
@@ -53,15 +55,26 @@ fun MainScene() {
 
   ModalNavigationDrawer(
     drawerContent = {
-      DrawerMenuList {
-        closeDrawer()
-        if (it.title != viewModel.title) {
-          scope.launch {
-            scrollState.scrollToItem(index = 0)
-            viewModel.selectedArea(it) {
-              listItems.refresh()
-            }
-          }
+      ModalDrawerSheet {
+        Spacer(Modifier.height(12.dp))
+        Area.values().forEach {
+          NavigationDrawerItem(
+            icon = { Icon(Icons.Rounded.PlayArrow, contentDescription = null) },
+            label = { Text(it.title) },
+            selected = it.title == viewModel.title,
+            onClick = {
+              closeDrawer()
+              if (it.title != viewModel.title) {
+                scope.launch {
+                  scrollState.scrollToItem(index = 0)
+                  viewModel.selectedArea(it) {
+                    listItems.refresh()
+                  }
+                }
+              }
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+          )
         }
       }
     },
@@ -70,6 +83,7 @@ fun MainScene() {
     Scaffold(topBar = {
       TopAppBar(
         title = { Text(text = viewModel.title) },
+        modifier = Modifier.shadow(4.dp),
         actions = {
           IconButton(onClick = {
             listItems.refresh()
@@ -90,7 +104,11 @@ fun MainScene() {
         NoResultView()
       } else {
         LazyColumn(state = scrollState, modifier = Modifier.padding(paddingValues)) {
-          items(listItems) {
+          items(
+            count = listItems.itemCount,
+            key = listItems.itemKey { it.id },
+          ) { index ->
+            val it = listItems[index]
             Column(modifier = Modifier
               .fillMaxWidth()
               .clickable { Intent(Intent.ACTION_VIEW, Uri.parse(it?.url)).also { context.startActivity(it) } }
@@ -165,7 +183,7 @@ fun DrawerMenuList(onSelected: (Area) -> Unit) {
     modifier = Modifier
       .width(300.dp)
       .fillMaxHeight()
-      .background(Color.Gray)
+      .background(Color.DarkGray)
   ) {
     Area.values().forEach {
       TextButton(modifier = Modifier.fillMaxWidth(), shape = RectangleShape, onClick = { onSelected(it) }) {

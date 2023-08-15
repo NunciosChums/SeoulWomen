@@ -13,8 +13,8 @@ class ItemPagingSource constructor(
   private var prevAreaClassName: String? = null
 
   override fun getRefreshKey(state: PagingState<Int, RowItem>): Int? {
-    return state.anchorPosition?.let { anchorPosition ->
-      val anchorPage = state.closestPageToPosition(anchorPosition)
+    return state.anchorPosition?.let {
+      val anchorPage = state.closestPageToPosition(it)
       anchorPage?.prevKey?.plus(itemsPerPage) ?: anchorPage?.nextKey?.minus(itemsPerPage)
     }
   }

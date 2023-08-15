@@ -11,7 +11,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import kotlinx.serialization.modules.plus
-import kr.susemi99.seoulwomen.BuildConfig
 import kr.susemi99.seoulwomen.api.Api
 import kr.susemi99.seoulwomen.extension.toString
 import kr.susemi99.seoulwomen.util.serializer.LocalDateSerializer
@@ -28,9 +27,9 @@ object NetworkModule {
   @Provides
   @Singleton
   fun providesOkHttpClient() = OkHttpClient.Builder().apply {
-    if (BuildConfig.DEBUG) {
+//    if (BuildConfig.DEBUG) {
       addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-    }
+//    }
   }.build()
 
   @Provides

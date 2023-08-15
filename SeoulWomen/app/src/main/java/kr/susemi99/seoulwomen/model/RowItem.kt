@@ -7,9 +7,11 @@ import kr.susemi99.seoulwomen.extension.comma
 import kr.susemi99.seoulwomen.extension.dayName
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.UUID
 
 @Serializable
 data class RowItem(
+  val id: String = UUID.randomUUID().toString(),
   @SerialName("CLASS_CODE") val classCode: String,
   @SerialName("CLASS_NAME") val className: String,
   @SerialName("ORGAN_CODE") val organCode: String,
