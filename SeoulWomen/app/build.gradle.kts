@@ -78,7 +78,7 @@ dependencies {
   implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.9")
 
   // json
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
 
   // logcat
   implementation("com.jakewharton.timber:timber:5.0.1")
