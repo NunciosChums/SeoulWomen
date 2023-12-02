@@ -63,7 +63,7 @@ dependencies {
   implementation("androidx.compose.ui:ui-tooling-preview")
   implementation("androidx.core:core-ktx:1.12.0")
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-  implementation("androidx.activity:activity-compose:1.8.0")
+  implementation("androidx.activity:activity-compose:1.8.1")
 
   testImplementation("junit:junit:4.13.2")
   debugImplementation("androidx.compose.ui:ui-tooling")
@@ -75,7 +75,7 @@ dependencies {
   // api
   implementation("com.squareup.retrofit2:retrofit:2.9.0")
   implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
-  implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.9")
+  implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.11")
 
   // json
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
@@ -90,8 +90,8 @@ dependencies {
   implementation("androidx.paging:paging-compose:3.2.1")
 
   // hilt
-  implementation("com.google.dagger:hilt-android:2.48.1")
-  kapt("com.google.dagger:hilt-android-compiler:2.48.1")
+  implementation("com.google.dagger:hilt-android:2.49")
+  kapt("com.google.dagger:hilt-android-compiler:2.49")
 
   // preference
   implementation("com.chibatching.kotpref:kotpref:2.13.2")
