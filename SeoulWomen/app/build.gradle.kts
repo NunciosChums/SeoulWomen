@@ -43,7 +43,7 @@ android {
     compose = true
   }
   composeOptions {
-    kotlinCompilerExtensionVersion = "1.5.12" // https://developer.android.com/jetpack/androidx/releases/compose-compiler
+    kotlinCompilerExtensionVersion = "1.5.13" // https://developer.android.com/jetpack/androidx/releases/compose-compiler
   }
   packaging {
     resources {
@@ -55,9 +55,9 @@ android {
 fun readProperty(key: String): String = gradleLocalProperties(rootDir, providers).getProperty(key)
 
 dependencies {
-  val lifecycleVersion = "2.7.0"
+  val lifecycleVersion = "2.8.2"
 
-  val composeBom = platform("androidx.compose:compose-bom:2024.04.01") // https://developer.android.com/jetpack/compose/setup#bom-version-mapping
+  val composeBom = platform("androidx.compose:compose-bom:2024.06.00") // https://developer.android.com/jetpack/compose/setup#bom-version-mapping
   implementation(composeBom)
   androidTestImplementation(composeBom)
   debugImplementation(composeBom)
@@ -66,7 +66,7 @@ dependencies {
   implementation("androidx.compose.material3:material3")
   implementation("androidx.compose.ui:ui")
   implementation("androidx.compose.ui:ui-tooling-preview")
-  implementation("androidx.core:core-ktx:1.13.0")
+  implementation("androidx.core:core-ktx:1.13.1")
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
   implementation("androidx.activity:activity-compose:1.9.0")
 
@@ -92,7 +92,7 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
 
   // pagination
-  implementation("androidx.paging:paging-compose:3.2.1")
+  implementation("androidx.paging:paging-compose:3.3.0")
 
   // hilt
   implementation("com.google.dagger:hilt-android:2.51.1")
