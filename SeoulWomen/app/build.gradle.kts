@@ -1,28 +1,26 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
-  id("com.android.application")
-  id("org.jetbrains.kotlin.android")
-  id("kotlinx-serialization")
-  id("kotlin-kapt")
-  id("dagger.hilt.android.plugin")
+  alias(libs.plugins.android.application)
+  alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.hilt)
+  alias(libs.plugins.kotlin.kapt)
 }
 
 android {
   namespace = "kr.susemi99.seoulwomen"
-  compileSdk = 34
+  compileSdk = 35
 
   defaultConfig {
     applicationId = "kr.susemi99.seoulwomen"
-    minSdk = 23
-    targetSdk = 34
+    minSdk = 26
+    targetSdk = 35
     versionCode = 12
     versionName = "4"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    vectorDrawables {
-      useSupportLibrary = true
-    }
     buildConfigField("String", "API_KEY", readProperty("API_KEY"))
   }
 
@@ -33,72 +31,60 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
   }
   kotlinOptions {
-    jvmTarget = "1.8"
+    jvmTarget = "11"
   }
   buildFeatures {
     compose = true
-  }
-  composeOptions {
-    kotlinCompilerExtensionVersion = "1.5.13" // https://developer.android.com/jetpack/androidx/releases/compose-compiler
-  }
-  packaging {
-    resources {
-      excludes += "/META-INF/{AL2.0,LGPL2.1}"
-    }
+    buildConfig = true
   }
 }
 
 fun readProperty(key: String): String = gradleLocalProperties(rootDir, providers).getProperty(key)
 
 dependencies {
-  val lifecycleVersion = "2.8.2"
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.lifecycle.runtime.ktx)
+  implementation(libs.androidx.activity.compose)
+  implementation(platform(libs.androidx.compose.bom))
+  implementation(libs.androidx.ui)
+  implementation(libs.androidx.ui.graphics)
+  implementation(libs.androidx.ui.tooling.preview)
+  implementation(libs.androidx.material3)
 
-  val composeBom = platform("androidx.compose:compose-bom:2024.06.00") // https://developer.android.com/jetpack/compose/setup#bom-version-mapping
-  implementation(composeBom)
-  androidTestImplementation(composeBom)
-  debugImplementation(composeBom)
-
-  implementation("androidx.compose.foundation:foundation")
-  implementation("androidx.compose.material3:material3")
-  implementation("androidx.compose.ui:ui")
-  implementation("androidx.compose.ui:ui-tooling-preview")
-  implementation("androidx.core:core-ktx:1.13.1")
-  implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-  implementation("androidx.activity:activity-compose:1.9.0")
-
-  testImplementation("junit:junit:4.13.2")
-  debugImplementation("androidx.compose.ui:ui-tooling")
-  debugImplementation("androidx.compose.ui:ui-test-manifest")
-  androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-  androidTestImplementation("androidx.test.ext:junit:1.1.5")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+  testImplementation(libs.junit)
+  androidTestImplementation(libs.androidx.junit)
+  androidTestImplementation(libs.androidx.espresso.core)
+  androidTestImplementation(platform(libs.androidx.compose.bom))
+  androidTestImplementation(libs.androidx.ui.test.junit4)
+  debugImplementation(libs.androidx.ui.tooling)
+  debugImplementation(libs.androidx.ui.test.manifest)
 
   // api
-  implementation("com.squareup.retrofit2:retrofit:2.11.0")
-  implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
-  implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.14")
+  implementation(libs.retrofit)
+  implementation(libs.retrofit.json.converter)
+  implementation(libs.retrofit.logging.interceptor)
 
   // json
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+  implementation(libs.kotlinx.serialization.json)
 
   // logcat
-  implementation("com.jakewharton.timber:timber:5.0.1")
+  implementation(libs.timber)
 
   // view model
-  implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+  implementation(libs.androidx.lifecycle.viewmodel.compose)
 
   // pagination
-  implementation("androidx.paging:paging-compose:3.3.0")
+  implementation(libs.androidx.paging.compose)
 
   // hilt
-  implementation("com.google.dagger:hilt-android:2.51.1")
-  kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+  implementation(libs.hilt.android)
+  kapt(libs.hilt.android.compiler)
 
   // preference
-  implementation("com.chibatching.kotpref:kotpref:2.13.2")
-  implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
+  implementation(libs.kotpref)
+  implementation(libs.androidx.security.crypto)
 }
