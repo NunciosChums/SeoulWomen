@@ -17,8 +17,8 @@ android {
     applicationId = "kr.susemi99.seoulwomen"
     minSdk = 26
     targetSdk = 36
-    versionCode = 12
-    versionName = "4"
+    versionCode = 13
+    versionName = "5"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     buildConfigField("String", "API_KEY", readProperty("API_KEY"))
