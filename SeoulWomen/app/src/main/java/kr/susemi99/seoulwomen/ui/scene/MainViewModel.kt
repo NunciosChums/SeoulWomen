@@ -27,7 +27,7 @@ class MainViewModel @Inject constructor(
 
   init {
     if (appPreference.areaTitle.isBlank()) {
-      selectedArea(Area.values().first())
+      selectedArea(Area.entries.first())
     }
   }
 
