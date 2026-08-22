@@ -90,12 +90,12 @@ fun MainScene() {
             onClick = {
               closeDrawer()
               if (it.title != viewModel.title) {
-                scope.launch {
-                  scrollState.scrollToItem(index = 0)
-                  viewModel.selectedArea(it) {
-                    listItems.refresh()
-                  }
+                // 에러/빈 화면에서는 LazyColumn이 컴포지션에 없어 scrollToItem이 끝나지 않으므로
+                // 지역 변경을 먼저 동기로 처리하고 스크롤은 별도 코루틴에서 수행한다.
+                viewModel.selectedArea(it) {
+                  listItems.refresh()
                 }
+                scope.launch { scrollState.scrollToItem(index = 0) }
               }
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
