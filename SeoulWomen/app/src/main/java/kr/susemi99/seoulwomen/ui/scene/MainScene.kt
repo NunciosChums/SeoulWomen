@@ -50,7 +50,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
@@ -63,7 +63,7 @@ import kr.susemi99.seoulwomen.ui.theme.RowTitleColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScene() {
-  val viewModel = viewModel<MainViewModel>()
+  val viewModel = hiltViewModel<MainViewModel>()
   val scrollState = rememberLazyListState()
   val listItems = viewModel.list.collectAsLazyPagingItems()
   val scope = rememberCoroutineScope()
@@ -92,9 +92,8 @@ fun MainScene() {
               if (it.title != viewModel.title) {
                 // 에러/빈 화면에서는 LazyColumn이 컴포지션에 없어 scrollToItem이 끝나지 않으므로
                 // 지역 변경을 먼저 동기로 처리하고 스크롤은 별도 코루틴에서 수행한다.
-                viewModel.selectedArea(it) {
-                  listItems.refresh()
-                }
+                viewModel.selectedArea(it)
+                listItems.refresh()
                 scope.launch { scrollState.scrollToItem(index = 0) }
               }
             },

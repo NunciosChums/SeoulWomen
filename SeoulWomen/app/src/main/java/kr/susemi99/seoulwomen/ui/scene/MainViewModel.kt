@@ -1,10 +1,9 @@
 package kr.susemi99.seoulwomen.ui.scene
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -17,12 +16,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-  application: Application,
   private val api: Api,
   private val appPreference: AppPreference,
-) : AndroidViewModel(application) {
+) : ViewModel() {
   var title by mutableStateOf(appPreference.areaTitle)
-  private var areaClassName by mutableStateOf(appPreference.areaClassName)
+    private set
+  private var areaClassName = appPreference.areaClassName
   val list = Pager(PagingConfig(pageSize = PAGE_SIZE)) { ItemPagingSource(api, areaClassName, PAGE_SIZE) }.flow.cachedIn(viewModelScope)
 
   init {
@@ -31,14 +30,14 @@ class MainViewModel @Inject constructor(
     }
   }
 
-  fun selectedArea(area: Area, onChanged: (() -> Unit)? = null) {
+  fun selectedArea(area: Area) {
     with(appPreference) {
       areaTitle = area.title
       areaClassName = area.className
     }
     title = area.title
     areaClassName = area.className
-    onChanged?.invoke()
   }
 }
+
 private const val PAGE_SIZE = 30
