@@ -20,4 +20,10 @@ data class WomenResourcesClassParentItem(
 ) {
   val classItem: WomenResourcesClassItem?
     get() = listOf(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11).firstOrNull { it != null }
+
+  /**
+   * 응답의 결과 코드. 성공 시에는 서비스 객체 내부의 RESULT, 실패 시에는 최상위 RESULT에 담겨 온다.
+   */
+  val resultItem: ResultItem?
+    get() = classItem?.result ?: result
 }
