@@ -9,11 +9,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -104,10 +108,14 @@ fun MainScene() {
     },
     drawerState = drawerState
   ) {
-    Scaffold(topBar = {
+    // 상태바·내비게이션바뿐 아니라 디스플레이 컷아웃(가로 모드 측면 노치)까지 피하도록 safeDrawing 사용
+    Scaffold(
+      contentWindowInsets = WindowInsets.safeDrawing,
+      topBar = {
       TopAppBar(
         title = { Text(text = viewModel.title) },
         modifier = Modifier.shadow(4.dp),
+        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         actions = {
           IconButton(onClick = {
             listItems.refresh()
@@ -134,7 +142,8 @@ fun MainScene() {
         )
         listItems.itemCount == 0 && listItems.loadState.append.endOfPaginationReached -> NoResultView(modifier = Modifier.padding(paddingValues))
         else -> {
-        LazyColumn(state = scrollState, modifier = Modifier.padding(paddingValues)) {
+        // contentPadding으로 넘겨 리스트가 내비게이션바 뒤까지 스크롤되되 마지막 항목은 가려지지 않게 한다.
+        LazyColumn(state = scrollState, contentPadding = paddingValues) {
           items(
             count = listItems.itemCount,
             key = listItems.itemKey { it.key },
