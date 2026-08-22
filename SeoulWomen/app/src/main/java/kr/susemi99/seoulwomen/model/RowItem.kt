@@ -3,15 +3,13 @@ package kr.susemi99.seoulwomen.model
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kr.susemi99.seoulwomen.extension.comma
 import kr.susemi99.seoulwomen.extension.dayName
+import kr.susemi99.seoulwomen.util.serializer.DecimalIntSerializer
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.UUID
 
 @Serializable
 data class RowItem(
-  val id: String = UUID.randomUUID().toString(),
   @SerialName("CLASS_CODE") val classCode: String,
   @SerialName("CLASS_NAME") val className: String,
   @SerialName("ORGAN_CODE") val organCode: String,
@@ -33,13 +31,19 @@ data class RowItem(
   @SerialName("FRIDAY") val friday: String?,
   @SerialName("SATURDAY") val saturday: String?,
   @SerialName("SUNDAY") val sunday: String?,
-  @SerialName("COLLECT_NUM") val collectNum: Float,
-  @SerialName("SPARE_NUM") val spareNum: Float,
-  @SerialName("EDUCATE_FEE") val educateFee: Float,
+  @Serializable(with = DecimalIntSerializer::class) @SerialName("COLLECT_NUM") val collectNum: Int,
+  @Serializable(with = DecimalIntSerializer::class) @SerialName("SPARE_NUM") val spareNum: Int,
+  @Serializable(with = DecimalIntSerializer::class) @SerialName("EDUCATE_FEE") val educateFee: Int,
   @SerialName("VISIT_RECEIVE_FLAG") val visitReceiveFlag: String,
   @SerialName("ONLINE_RECEIVE_FLAG") val onlineReceiveFlag: String,
   @SerialName("URL") val url: String
 ) {
+  /**
+   * 목록 키: 센터(organCode)와 강좌 코드 조합
+   */
+  val key
+    get() = "$organCode-$classCode"
+
   /**
    * 난이도
    */
@@ -97,14 +101,14 @@ data class RowItem(
    * 잔여
    */
   val remainNumber
-    get() = "${spareNum.toInt()}/${collectNum.toInt()}명"
+    get() = "$spareNum/${collectNum}명"
 
   /**
    * 수강료
    */
   val fee
-    get() = if (educateFee > 0f) {
-      "${educateFee.comma}원"
+    get() = if (educateFee > 0) {
+      "%,d원".format(educateFee)
     } else {
       "무료"
     }
