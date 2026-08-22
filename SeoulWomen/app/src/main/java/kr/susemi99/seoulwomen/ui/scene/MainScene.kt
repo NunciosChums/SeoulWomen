@@ -3,6 +3,7 @@ package kr.susemi99.seoulwomen.ui.scene
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -32,6 +35,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
@@ -45,10 +49,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import kr.susemi99.seoulwomen.R
+import kr.susemi99.seoulwomen.api.ApiException
 import kr.susemi99.seoulwomen.enums.Area
 import kr.susemi99.seoulwomen.ui.theme.RowTitleColor
 
@@ -117,9 +123,16 @@ fun MainScene() {
           }
         })
     }) { paddingValues ->
-      if (listItems.itemCount == 0 && listItems.loadState.prepend.endOfPaginationReached) {
-        NoResultView()
-      } else {
+      val refreshState = listItems.loadState.refresh
+      when {
+        refreshState is LoadState.Loading -> LoadingView(modifier = Modifier.padding(paddingValues))
+        refreshState is LoadState.Error -> ErrorView(
+          throwable = refreshState.error,
+          onRetry = { listItems.retry() },
+          modifier = Modifier.padding(paddingValues),
+        )
+        listItems.itemCount == 0 && listItems.loadState.append.endOfPaginationReached -> NoResultView(modifier = Modifier.padding(paddingValues))
+        else -> {
         LazyColumn(state = scrollState, modifier = Modifier.padding(paddingValues)) {
           items(
             count = listItems.itemCount,
@@ -145,16 +158,17 @@ fun MainScene() {
             HorizontalDivider()
           }
         }
+        }
       }
     }
   }
 }
 
 @Composable
-fun NoResultView() {
+fun NoResultView(modifier: Modifier = Modifier) {
   Column(
     verticalArrangement = Arrangement.Center,
-    modifier = Modifier.fillMaxSize()
+    modifier = modifier.fillMaxSize()
   ) {
     Text(
       text = stringResource(id = R.string.no_result),
@@ -162,6 +176,50 @@ fun NoResultView() {
       fontSize = 20.sp,
       modifier = Modifier.fillMaxWidth()
     )
+  }
+}
+
+@Composable
+fun LoadingView(modifier: Modifier = Modifier) {
+  Box(
+    contentAlignment = Alignment.Center,
+    modifier = modifier.fillMaxSize()
+  ) {
+    CircularProgressIndicator()
+  }
+}
+
+@Composable
+fun ErrorView(throwable: Throwable, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+  val message = when (throwable) {
+    is ApiException -> "${throwable.message} (${throwable.code})"
+    else -> throwable.localizedMessage ?: stringResource(id = R.string.error_unknown)
+  }
+  Column(
+    verticalArrangement = Arrangement.Center,
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = modifier
+      .fillMaxSize()
+      .padding(20.dp)
+  ) {
+    Text(
+      text = stringResource(id = R.string.error_title),
+      textAlign = TextAlign.Center,
+      fontSize = 20.sp,
+      fontWeight = FontWeight.Bold,
+      modifier = Modifier.fillMaxWidth()
+    )
+    Spacer(Modifier.height(8.dp))
+    Text(
+      text = message,
+      textAlign = TextAlign.Center,
+      fontSize = 16.sp,
+      modifier = Modifier.fillMaxWidth()
+    )
+    Spacer(Modifier.height(16.dp))
+    Button(onClick = onRetry) {
+      Text(text = stringResource(id = R.string.retry))
+    }
   }
 }
 

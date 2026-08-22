@@ -3,6 +3,7 @@ package kr.susemi99.seoulwomen.ui.scene
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import kr.susemi99.seoulwomen.api.Api
+import kr.susemi99.seoulwomen.api.ApiException
 import kr.susemi99.seoulwomen.model.RowItem
 
 /**
@@ -29,6 +30,9 @@ class ItemPagingSource(
 
     return try {
       val result = api.list(startIndex = startIndex, endIndex = endIndex, areaValue = areaClassName)
+      result.resultItem?.let {
+        if (it.code != ApiException.SUCCESS_CODE) throw ApiException(it.code, it.message)
+      }
       val totalCount = result.classItem?.listTotalCount ?: 0
       LoadResult.Page(
         data = result.classItem?.rows ?: listOf(),
