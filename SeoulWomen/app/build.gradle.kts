@@ -2,21 +2,20 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
   alias(libs.plugins.android.application)
-  alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.hilt)
-  alias(libs.plugins.kotlin.kapt)
+  alias(libs.plugins.ksp)
 }
 
 android {
   namespace = "kr.susemi99.seoulwomen"
-  compileSdk = 36
+  compileSdk = 37
 
   defaultConfig {
     applicationId = "kr.susemi99.seoulwomen"
     minSdk = 26
-    targetSdk = 36
+    targetSdk = 37
     versionCode = 14
     versionName = "6"
 
@@ -33,9 +32,6 @@ android {
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-  }
-  kotlin {
-    jvmToolchain(17)
   }
   buildFeatures {
     compose = true
@@ -83,7 +79,7 @@ dependencies {
 
   // hilt
   implementation(libs.hilt.android)
-  kapt(libs.hilt.android.compiler)
+  ksp(libs.hilt.android.compiler)
 
   // preference
   implementation(libs.kotpref)
