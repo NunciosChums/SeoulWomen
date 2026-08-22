@@ -23,7 +23,7 @@ class MainViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
   var title by mutableStateOf(appPreference.areaTitle)
   private var areaClassName by mutableStateOf(appPreference.areaClassName)
-  val list = Pager(PagingConfig(pageSize = 3)) { ItemPagingSource(api, areaClassName) }.flow.cachedIn(viewModelScope)
+  val list = Pager(PagingConfig(pageSize = PAGE_SIZE)) { ItemPagingSource(api, areaClassName, PAGE_SIZE) }.flow.cachedIn(viewModelScope)
 
   init {
     if (appPreference.areaTitle.isBlank()) {
@@ -41,3 +41,4 @@ class MainViewModel @Inject constructor(
     onChanged?.invoke()
   }
 }
+private const val PAGE_SIZE = 30
