@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+# IDE 로컬 환경(JDK 등)에 따라 달라지는 파일
+/.idea/compiler.xml
+/.idea/gradle.xml
+/.idea/misc.xml
