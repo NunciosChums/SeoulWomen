@@ -1,6 +1,8 @@
 package kr.susemi99.seoulwomen.ui.scene
 
+import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -138,22 +140,22 @@ fun MainScene() {
             count = listItems.itemCount,
             key = listItems.itemKey { it.id },
           ) { index ->
-            val it = listItems[index]
+            val item = listItems[index] ?: return@items
             Column(modifier = Modifier
               .fillMaxWidth()
-              .clickable { Intent(Intent.ACTION_VIEW, it?.url?.toUri()).also { context.startActivity(it) } }
+              .clickable { openUrl(context, item.url) }
               .padding(10.dp)) {
               Text(
                 buildAnnotatedString {
-                  withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 16.sp)) { append("${it?.difficulty} ") }
-                  withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 20.sp)) { append("${it?.className}") }
+                  withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 16.sp)) { append("${item.difficulty} ") }
+                  withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 20.sp)) { append(item.className) }
                 }
               )
-              RowView("신청기간", "${it?.receivePeriod}")
-              RowView("교육기간", "${it?.educatePeriod} ${it?.educateDays}")
-              RowView("잔여", "${it?.remainNumber}")
-              RowView("수강료", "${it?.fee}")
-              RowView("접수", "${it?.howToRegister}")
+              RowView("신청기간", item.receivePeriod)
+              RowView("교육기간", "${item.educatePeriod} ${item.educateDays}")
+              RowView("잔여", item.remainNumber)
+              RowView("수강료", item.fee)
+              RowView("접수", item.howToRegister)
             }
             HorizontalDivider()
           }
@@ -161,6 +163,18 @@ fun MainScene() {
         }
       }
     }
+  }
+}
+
+private fun openUrl(context: Context, url: String) {
+  if (url.isBlank()) {
+    Toast.makeText(context, R.string.error_no_url, Toast.LENGTH_SHORT).show()
+    return
+  }
+  runCatching {
+    context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+  }.onFailure {
+    Toast.makeText(context, R.string.error_open_url, Toast.LENGTH_SHORT).show()
   }
 }
 
