@@ -7,6 +7,4 @@
   <string name="error_no_url">연결된 주소가 없습니다.</string>
   <string name="error_open_url">주소를 열 수 없습니다.</string>
 
-  <string name="default_area_name">장애 여성인력개발센터</string>
-  <string name="default_area_value">SeoulDisableWomenResourcesClass</string>
 </resources>
