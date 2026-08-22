@@ -137,7 +137,7 @@ fun MainScene() {
         LazyColumn(state = scrollState, modifier = Modifier.padding(paddingValues)) {
           items(
             count = listItems.itemCount,
-            key = listItems.itemKey { it.id },
+            key = listItems.itemKey { it.key },
           ) { index ->
             val item = listItems[index] ?: return@items
             Column(modifier = Modifier
