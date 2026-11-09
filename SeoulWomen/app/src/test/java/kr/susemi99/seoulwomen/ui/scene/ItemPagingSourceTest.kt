@@ -143,14 +143,37 @@ class ItemPagingSourceTest {
   }
 
   @Test
-  fun `새로고침 키는 현재 보고 있는 페이지 번호다`() = runBlocking {
-    val source = sourceFor(FakeApi { success(totalCount = 90) })
+  fun `새로고침은 보고 있던 위치와 관계없이 첫 페이지부터 시작한다`() = runBlocking {
+    val secondPage = List(PAGE_SIZE) { rowItem(classCode = "D$it") }
+    val pages = ArrayDeque(listOf(fullPage, secondPage))
+    val source = sourceFor(FakeApi { success(totalCount = 90, rows = pages.removeFirst()) })
     val pager = TestPager(PagingConfig(pageSize = PAGE_SIZE, enablePlaceholders = false), source)
     pager.refresh()
     pager.append()
 
-    assertEquals(0, source.getRefreshKey(pager.getPagingState(anchorPosition = 10)))
-    assertEquals(1, source.getRefreshKey(pager.getPagingState(anchorPosition = 40)))
+    assertNull(source.getRefreshKey(pager.getPagingState(anchorPosition = 10)))
+    assertNull(source.getRefreshKey(pager.getPagingState(anchorPosition = 40)))
+  }
+
+  @Test
+  fun `이전 페이지와 겹치는 항목은 다음 페이지에서 제외한다`() = runBlocking {
+    val pages = ArrayDeque(listOf(fullPage, listOf(fullPage.last(), rowItem(classCode = "C30"))))
+    val pager = pagerFor(FakeApi { success(totalCount = 90, rows = pages.removeFirst()) })
+
+    pager.refresh()
+    val page = checkNotNull(pager.append()).asPage()
+
+    assertEquals(listOf(rowItem(classCode = "C30")), page.data)
+    assertEquals(2, page.nextKey)
+  }
+
+  @Test
+  fun `한 페이지 안에서 겹치는 항목도 제외한다`() = runBlocking {
+    val rows = listOf(rowItem(classCode = "C1"), rowItem(classCode = "C1"), rowItem(classCode = "C2"))
+
+    val page = pagerFor(FakeApi { success(totalCount = 3, rows = rows) }).refresh().asPage()
+
+    assertEquals(listOf(rowItem(classCode = "C1"), rowItem(classCode = "C2")), page.data)
   }
 
   private companion object {

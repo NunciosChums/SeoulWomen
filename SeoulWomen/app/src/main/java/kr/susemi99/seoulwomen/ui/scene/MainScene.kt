@@ -177,6 +177,11 @@ fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelect
             }
             HorizontalDivider()
           }
+          when (listItems.loadState.append) {
+            is LoadState.Loading -> item(key = "append_loading") { AppendLoadingView() }
+            is LoadState.Error -> item(key = "append_error") { AppendErrorView(onRetry = { listItems.retry() }) }
+            is LoadState.NotLoading -> Unit
+          }
         }
         }
       }
@@ -218,6 +223,39 @@ fun LoadingView(modifier: Modifier = Modifier) {
     modifier = modifier.fillMaxSize()
   ) {
     CircularProgressIndicator()
+  }
+}
+
+@Composable
+fun AppendLoadingView() {
+  Box(
+    contentAlignment = Alignment.Center,
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(16.dp)
+  ) {
+    CircularProgressIndicator()
+  }
+}
+
+@Composable
+fun AppendErrorView(onRetry: () -> Unit) {
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(16.dp)
+  ) {
+    Text(
+      text = stringResource(id = R.string.error_title),
+      textAlign = TextAlign.Center,
+      fontSize = 16.sp,
+      modifier = Modifier.fillMaxWidth()
+    )
+    Spacer(Modifier.height(8.dp))
+    Button(onClick = onRetry) {
+      Text(text = stringResource(id = R.string.retry))
+    }
   }
 }
 

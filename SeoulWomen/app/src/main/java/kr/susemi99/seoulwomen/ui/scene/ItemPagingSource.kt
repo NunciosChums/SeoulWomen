@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import kr.susemi99.seoulwomen.api.Api
 import kr.susemi99.seoulwomen.api.ApiException
 import kr.susemi99.seoulwomen.model.RowItem
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 서울 열린데이터 API용 PagingSource.
@@ -15,13 +16,11 @@ class ItemPagingSource(
   private val areaClassName: String,
   private val pageSize: Int,
 ) : PagingSource<Int, RowItem>() {
+  /** 페이지를 불러오는 사이에 서버 쪽 순서가 바뀌어 같은 항목이 다시 오면 LazyColumn 키가 겹치므로 걸러낸다. */
+  private val loadedKeys = ConcurrentHashMap.newKeySet<String>()
 
-  override fun getRefreshKey(state: PagingState<Int, RowItem>): Int? {
-    return state.anchorPosition?.let { anchorPosition ->
-      val anchorPage = state.closestPageToPosition(anchorPosition)
-      anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
-    }
-  }
+  /** 지역 변경과 새로고침은 항상 첫 페이지부터 다시 불러온다. */
+  override fun getRefreshKey(state: PagingState<Int, RowItem>): Int? = null
 
   override suspend fun load(params: LoadParams<Int>): LoadResult<Int, RowItem> {
     val page = params.key ?: 0
@@ -35,7 +34,7 @@ class ItemPagingSource(
       }
       val totalCount = result.classItem?.listTotalCount ?: 0
       LoadResult.Page(
-        data = result.classItem?.rows ?: listOf(),
+        data = result.classItem?.rows.orEmpty().filter { loadedKeys.add(it.key) },
         prevKey = if (page == 0) null else page - 1,
         nextKey = if (endIndex < totalCount) page + 1 else null,
       )

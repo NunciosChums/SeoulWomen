@@ -123,6 +123,30 @@ class MainContentTest {
   }
 
   @Test
+  fun 다음_페이지_로드에_실패하면_목록_아래에_재시도_버튼을_표시한다() {
+    val appendError = LoadStates(refresh = notLoading, prepend = notLoading, append = LoadState.Error(IOException("오류")))
+    show(PagingData.from(listOf(row), sourceLoadStates = appendError))
+
+    composeRule.onNodeWithText("[초급] 테스트 강좌").assertIsDisplayed()
+    composeRule.onNodeWithText(context.getString(R.string.error_title)).assertIsDisplayed()
+    composeRule.onNodeWithText(context.getString(R.string.retry)).assertIsDisplayed()
+  }
+
+  @Test
+  fun 다음_페이지_재시도_버튼을_누르면_콜백을_호출한다() {
+    var retryCount = 0
+    composeRule.setContent {
+      SeoulWomenTheme {
+        AppendErrorView(onRetry = { retryCount++ })
+      }
+    }
+
+    composeRule.onNodeWithText(context.getString(R.string.retry)).performClick()
+
+    composeRule.runOnIdle { assertEquals(1, retryCount) }
+  }
+
+  @Test
   fun 드로어에서_다른_센터를_고르면_콜백을_호출한다() {
     show(emptyResult())
 
