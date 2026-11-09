@@ -1,14 +1,24 @@
 package kr.susemi99.seoulwomen.util.serializer
 
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
 class LocalDateSerializerTest {
   private val json = Json
+
+  /** kotlinx.serialization 1.12부터 deserializer의 예외는 SerializationException으로 감싸져 전달된다 */
+  private fun assertParseFails(jsonString: String) {
+    val exception = assertThrows(SerializationException::class.java) {
+      json.decodeFromString(LocalDateSerializer, jsonString)
+    }
+    assertTrue(exception.cause is DateTimeParseException)
+  }
 
   @Test
   fun `yyyyMMdd 문자열을 LocalDate로 변환한다`() {
@@ -27,9 +37,7 @@ class LocalDateSerializerTest {
 
   @Test
   fun `하이픈이 포함된 형식은 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalDateSerializer, "\"2026-08-22\"")
-    }
+    assertParseFails("\"2026-08-22\"")
   }
 
   @Test
@@ -40,22 +48,16 @@ class LocalDateSerializerTest {
 
   @Test
   fun `존재하지 않는 월은 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalDateSerializer, "\"20261301\"")
-    }
+    assertParseFails("\"20261301\"")
   }
 
   @Test
   fun `빈 문자열은 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalDateSerializer, "\"\"")
-    }
+    assertParseFails("\"\"")
   }
 
   @Test
   fun `자릿수가 모자라면 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalDateSerializer, "\"2026822\"")
-    }
+    assertParseFails("\"2026822\"")
   }
 }
