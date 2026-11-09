@@ -5,7 +5,6 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import kotlinx.serialization.modules.plus
 import kr.susemi99.seoulwomen.util.serializer.LocalDateSerializer
-import kr.susemi99.seoulwomen.util.serializer.LocalTimeSerializer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -21,7 +20,6 @@ class RowItemTest {
     isLenient = true
     serializersModule += SerializersModule {
       contextual(LocalDateSerializer)
-      contextual(LocalTimeSerializer)
     }
   }
 
@@ -29,9 +27,9 @@ class RowItemTest {
 
   @Before
   fun setUp() {
-    // dayName 은 기본 로케일로 요일을 포맷하므로 테스트를 결정적으로 만들기 위해 한국어로 고정
+    // dayName 은 기기 언어와 관계없이 한국어여야 하므로 한국어가 아닌 기본 로케일에서 검증한다.
     defaultLocale = Locale.getDefault()
-    Locale.setDefault(Locale.KOREA)
+    Locale.setDefault(Locale.US)
   }
 
   @After
@@ -45,6 +43,7 @@ class RowItemTest {
     fee: String = "262400.0",
     receiveFrom: String = "20260801",
     receiveTo: String = "20260810",
+    receiveTimeTo: String = "18:00",
     educateFrom: String = "20260901",
     educateTo: String = "20260930",
     monday: String? = "Y",
@@ -61,7 +60,7 @@ class RowItemTest {
     return """{
     "CLASS_CODE":"$classCode","CLASS_NAME":"강좌","ORGAN_CODE":"$organCode","ORGAN_NAME":"센터",
     "DIFFICULTY":"1","DIFFICULTY_NAME":"초급",
-    "RECEIVE_FROM":"$receiveFrom","RECEIVE_TO":"$receiveTo","RECEIVE_TIME_FROM":"09:00","RECEIVE_TIME_TO":"18:00",
+    "RECEIVE_FROM":"$receiveFrom","RECEIVE_TO":"$receiveTo","RECEIVE_TIME_FROM":"09:00","RECEIVE_TIME_TO":"$receiveTimeTo",
     "EDUCATE_FROM":"$educateFrom","EDUCATE_TO":"$educateTo","EDUCATE_TIME_FROM":"10:00","EDUCATE_TIME_TO":"12:00",
     "MONDAY":${monday.json()},"TUESDAY":${tuesday.json()},"WEDNESDAY":${wednesday.json()},"THURSDAY":${thursday.json()},
     "FRIDAY":${friday.json()},"SATURDAY":${saturday.json()},"SUNDAY":${sunday.json()},
@@ -122,6 +121,12 @@ class RowItemTest {
   fun `신청 시작일과 종료일이 같으면 한 줄로 표시한다`() {
     val item = decode(body(receiveFrom = "20260801", receiveTo = "20260801"))
     assertEquals("2026-08-01(토) 09:00 ~ 18:00", item.receivePeriod)
+  }
+
+  @Test
+  fun `24시 마감은 서버 값 그대로 표시한다`() {
+    val item = decode(body(receiveTimeTo = "24:00"))
+    assertEquals("2026-08-01(토) 09:00 ~\n2026-08-10(월) 24:00", item.receivePeriod)
   }
 
   // educatePeriod

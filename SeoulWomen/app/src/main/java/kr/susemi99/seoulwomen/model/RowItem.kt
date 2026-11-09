@@ -5,8 +5,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kr.susemi99.seoulwomen.extension.dayName
 import kr.susemi99.seoulwomen.util.serializer.DecimalIntSerializer
+import kr.susemi99.seoulwomen.util.serializer.TimeTextSerializer
 import java.time.LocalDate
-import java.time.LocalTime
 
 @Serializable
 data class RowItem(
@@ -18,12 +18,12 @@ data class RowItem(
   @SerialName("DIFFICULTY_NAME") val difficultyName: String,
   @Contextual @SerialName("RECEIVE_FROM") val receiveFrom: LocalDate,
   @Contextual @SerialName("RECEIVE_TO") val receiveTo: LocalDate,
-  @Contextual @SerialName("RECEIVE_TIME_FROM") val receiveTimeFrom: LocalTime,
-  @Contextual @SerialName("RECEIVE_TIME_TO") val receiveTimeTo: LocalTime,
+  @Serializable(with = TimeTextSerializer::class) @SerialName("RECEIVE_TIME_FROM") val receiveTimeFrom: String,
+  @Serializable(with = TimeTextSerializer::class) @SerialName("RECEIVE_TIME_TO") val receiveTimeTo: String,
   @Contextual @SerialName("EDUCATE_FROM") val educateFrom: LocalDate,
   @Contextual @SerialName("EDUCATE_TO") val educateTo: LocalDate,
-  @Contextual @SerialName("EDUCATE_TIME_FROM") val educateTimeFrom: LocalTime,
-  @Contextual @SerialName("EDUCATE_TIME_TO") val educateTimeTo: LocalTime,
+  @Serializable(with = TimeTextSerializer::class) @SerialName("EDUCATE_TIME_FROM") val educateTimeFrom: String,
+  @Serializable(with = TimeTextSerializer::class) @SerialName("EDUCATE_TIME_TO") val educateTimeTo: String,
   @SerialName("MONDAY") val monday: String?,
   @SerialName("TUESDAY") val tuesday: String?,
   @SerialName("WEDNESDAY") val wednesday: String?,

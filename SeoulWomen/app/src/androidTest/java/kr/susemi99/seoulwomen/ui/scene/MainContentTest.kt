@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.PagingData
@@ -25,7 +26,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.time.LocalDate
-import java.time.LocalTime
 
 /** 네트워크 없이 목록 화면의 상태별 표시와 드로어 동작을 확인한다. */
 @RunWith(AndroidJUnit4::class)
@@ -95,17 +95,19 @@ class MainContentTest {
   }
 
   @Test
-  fun 일반_예외면_예외_메시지를_표시한다() {
-    showError(IOException("네트워크 오류"))
+  fun 네트워크_예외면_원문_대신_안내_문구를_표시한다() {
+    showError(IOException("Unable to resolve host"))
 
-    composeRule.onNodeWithText("네트워크 오류").assertIsDisplayed()
+    composeRule.onNodeWithText(context.getString(R.string.error_network)).assertIsDisplayed()
+    composeRule.onNodeWithText("Unable to resolve host").assertDoesNotExist()
   }
 
   @Test
-  fun 메시지_없는_예외면_알_수_없는_오류를_표시한다() {
-    showError(IOException())
+  fun 기타_예외면_원문_대신_알_수_없는_오류를_표시한다() {
+    showError(IllegalStateException("내부 메시지"))
 
     composeRule.onNodeWithText(context.getString(R.string.error_unknown)).assertIsDisplayed()
+    composeRule.onNodeWithText("내부 메시지").assertDoesNotExist()
   }
 
   @Test
@@ -147,6 +149,14 @@ class MainContentTest {
   }
 
   @Test
+  fun 드로어를_스크롤해_마지막_센터까지_볼_수_있다() {
+    show(emptyResult())
+
+    composeRule.onNodeWithContentDescription("home icon").performClick()
+    composeRule.onNode(hasText(Area.entries.last().title) and hasClickAction()).performScrollTo().assertIsDisplayed()
+  }
+
+  @Test
   fun 드로어에서_다른_센터를_고르면_콜백을_호출한다() {
     show(emptyResult())
 
@@ -173,12 +183,12 @@ class MainContentTest {
     difficultyName = "초급",
     receiveFrom = LocalDate.of(2026, 3, 2),
     receiveTo = LocalDate.of(2026, 3, 6),
-    receiveTimeFrom = LocalTime.of(9, 0),
-    receiveTimeTo = LocalTime.of(18, 0),
+    receiveTimeFrom = "09:00",
+    receiveTimeTo = "18:00",
     educateFrom = LocalDate.of(2026, 3, 9),
     educateTo = LocalDate.of(2026, 3, 13),
-    educateTimeFrom = LocalTime.of(14, 0),
-    educateTimeTo = LocalTime.of(17, 0),
+    educateTimeFrom = "14:00",
+    educateTimeTo = "17:00",
     monday = "Y",
     tuesday = "N",
     wednesday = "Y",

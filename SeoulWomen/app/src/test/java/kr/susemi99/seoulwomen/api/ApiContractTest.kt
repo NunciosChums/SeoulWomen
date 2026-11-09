@@ -12,7 +12,6 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
-import java.time.LocalTime
 
 /** 실제 API 응답을 앱과 같은 Retrofit·Json 설정으로 처리해 라이브러리 업그레이드 영향을 확인한다. */
 class ApiContractTest {
@@ -49,12 +48,12 @@ class ApiContractTest {
     assertEquals("중급", row.difficultyName)
     assertEquals(LocalDate.of(2026, 9, 10), row.receiveFrom)
     assertEquals(LocalDate.of(2026, 11, 18), row.receiveTo)
-    assertEquals(LocalTime.of(9, 0), row.receiveTimeFrom)
-    assertEquals(LocalTime.of(18, 0), row.receiveTimeTo)
+    assertEquals("09:00", row.receiveTimeFrom)
+    assertEquals("18:00", row.receiveTimeTo)
     assertEquals(LocalDate.of(2026, 11, 12), row.educateFrom)
     assertEquals(LocalDate.of(2026, 12, 23), row.educateTo)
-    assertEquals(LocalTime.of(18, 30), row.educateTimeFrom)
-    assertEquals(LocalTime.of(21, 30), row.educateTimeTo)
+    assertEquals("18:30", row.educateTimeFrom)
+    assertEquals("21:30", row.educateTimeTo)
     assertEquals("Y", row.saturday)
     assertEquals("N", row.sunday)
     assertEquals(12, row.collectNum)
@@ -63,6 +62,23 @@ class ApiContractTest {
     assertEquals("Y", row.visitReceiveFlag)
     assertEquals("Y", row.onlineReceiveFlag)
     assertEquals("https://bukbu.seoulcareerup.or.kr/bukbu/edu/selectEduProgram.do?sch_class_code=C100163836", row.url)
+  }
+
+  @Test
+  fun `날짜 형식이 잘못된 행만 건너뛰고 나머지를 읽는다`() = runBlocking {
+    val body = Regex(""""RECEIVE_FROM"\s*:\s*"\d+"""").replaceFirst(fixture("list_success.json"), "\"RECEIVE_FROM\":\"\"")
+
+    val rows = checkNotNull(apiRespondingWith(body).list(area, 1, 3).classItem).rows
+
+    assertEquals(2, rows.size)
+    assertTrue(rows.none { it.classCode == "C100163836" })
+  }
+
+  @Test
+  fun `값이 null인 행도 건너뛴다`() = runBlocking {
+    val body = Regex(""""RECEIVE_TIME_TO"\s*:\s*"[\d:]+"""").replaceFirst(fixture("list_success.json"), """"RECEIVE_TIME_TO":null""")
+
+    assertEquals(2, checkNotNull(apiRespondingWith(body).list(area, 1, 3).classItem).rows.size)
   }
 
   @Test
