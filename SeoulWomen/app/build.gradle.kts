@@ -1,4 +1,4 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Properties
 
 plugins {
   alias(libs.plugins.android.application)
@@ -10,7 +10,9 @@ plugins {
 
 android {
   namespace = "kr.susemi99.seoulwomen"
-  compileSdk = 37
+  compileSdk {
+    version = release(37)
+  }
 
   defaultConfig {
     applicationId = "kr.susemi99.seoulwomen"
@@ -47,7 +49,10 @@ android {
   }
 }
 
-fun readProperty(key: String): String = gradleLocalProperties(rootDir, providers).getProperty(key)
+fun readProperty(key: String): String {
+  val localProperties = providers.fileContents(rootProject.layout.projectDirectory.file("local.properties")).asText.orNull.orEmpty()
+  return Properties().apply { load(localProperties.reader()) }.getProperty(key)
+}
 
 dependencies {
   implementation(libs.androidx.core.ktx)
