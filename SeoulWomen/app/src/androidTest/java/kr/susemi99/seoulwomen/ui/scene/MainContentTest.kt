@@ -45,7 +45,7 @@ class MainContentTest {
     composeRule.setContent {
       SeoulWomenTheme {
         MainContent(
-          title = currentArea.title,
+          area = currentArea,
           listItems = flow.collectAsLazyPagingItems(),
           onAreaSelected = { selectedAreas += it },
         )
@@ -60,7 +60,7 @@ class MainContentTest {
   }
 
   private fun clickDrawerItem(area: Area) {
-    composeRule.onNodeWithContentDescription("home icon").performClick()
+    composeRule.onNodeWithContentDescription(context.getString(R.string.content_description_open_menu)).performClick()
     composeRule.onNode(hasText(area.title) and hasClickAction()).performClick()
     composeRule.waitForIdle()
   }
@@ -72,7 +72,7 @@ class MainContentTest {
     // 닫힌 드로어에도 같은 제목의 항목이 있으므로 클릭할 수 없는 상단바 제목만 찾는다.
     composeRule.onNode(hasText(currentArea.title) and !hasClickAction()).assertIsDisplayed()
     composeRule.onNodeWithText("[초급] 테스트 강좌").assertIsDisplayed()
-    composeRule.onNodeWithText("신청기간: ").assertIsDisplayed()
+    composeRule.onNodeWithText("${context.getString(R.string.label_receive_period)}: ").assertIsDisplayed()
     composeRule.onNodeWithText("5/20명").assertIsDisplayed()
     composeRule.onNodeWithText("100,000원").assertIsDisplayed()
     composeRule.onNodeWithText("방문, 온라인").assertIsDisplayed()
@@ -152,7 +152,7 @@ class MainContentTest {
   fun 드로어를_스크롤해_마지막_센터까지_볼_수_있다() {
     show(emptyResult())
 
-    composeRule.onNodeWithContentDescription("home icon").performClick()
+    composeRule.onNodeWithContentDescription(context.getString(R.string.content_description_open_menu)).performClick()
     composeRule.onNode(hasText(Area.entries.last().title) and hasClickAction()).performScrollTo().assertIsDisplayed()
   }
 

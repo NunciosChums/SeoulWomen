@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kr.susemi99.seoulwomen.R
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,7 +20,7 @@ class MainActivitySmokeTest {
 
   @Test
   fun 앱이_실행되면_상단바를_표시한다() {
-    composeRule.onNodeWithContentDescription("home icon").assertIsDisplayed()
-    composeRule.onNodeWithContentDescription("refresh").assertIsDisplayed()
+    composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.content_description_open_menu)).assertIsDisplayed()
+    composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.content_description_refresh)).assertIsDisplayed()
   }
 }

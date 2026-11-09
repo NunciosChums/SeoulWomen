@@ -34,7 +34,7 @@ fun apiRespondingWith(body: String, onRequest: (Request) -> Unit = {}): Api {
         .build()
     }
     .build()
-  val retrofit = NetworkModule.provideRetrofit(client, NetworkModule.provideConverterFactory())
+  val retrofit = NetworkModule.provideRetrofit(client, NetworkModule.provideJson())
   return NetworkModule.provideApiService(retrofit)
 }
 

@@ -7,5 +7,11 @@
   <string name="retry">다시 시도</string>
   <string name="error_no_url">연결된 주소가 없습니다.</string>
   <string name="error_open_url">주소를 열 수 없습니다.</string>
-
+  <string name="label_receive_period">신청기간</string>
+  <string name="label_educate_period">교육기간</string>
+  <string name="label_remain">잔여</string>
+  <string name="label_fee">수강료</string>
+  <string name="label_register">접수</string>
+  <string name="content_description_refresh">새로고침</string>
+  <string name="content_description_open_menu">메뉴 열기</string>
 </resources>

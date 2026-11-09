@@ -43,6 +43,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,16 +74,17 @@ import java.io.IOException
 @Composable
 fun MainScene() {
   val viewModel = hiltViewModel<MainViewModel>()
+  val area by viewModel.area.collectAsState()
   MainContent(
-    title = viewModel.title,
+    area = area,
     listItems = viewModel.list.collectAsLazyPagingItems(),
-    onAreaSelected = viewModel::selectedArea,
+    onAreaSelected = viewModel::selectArea,
   )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelected: (Area) -> Unit) {
+fun MainContent(area: Area, listItems: LazyPagingItems<RowItem>, onAreaSelected: (Area) -> Unit) {
   val scrollState = rememberLazyListState()
   val scope = rememberCoroutineScope()
   val context = LocalContext.current
@@ -105,14 +108,13 @@ fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelect
             NavigationDrawerItem(
               icon = { Icon(Icons.Rounded.PlayArrow, contentDescription = null) },
               label = { Text(it.title) },
-              selected = it.title == title,
+              selected = it == area,
               onClick = {
                 closeDrawer()
-                if (it.title != title) {
+                if (it != area) {
                   // 에러/빈 화면에서는 LazyColumn이 컴포지션에 없어 scrollToItem이 끝나지 않으므로
                   // 지역 변경을 먼저 동기로 처리하고 스크롤은 별도 코루틴에서 수행한다.
                   onAreaSelected(it)
-                  listItems.refresh()
                   scope.launch { scrollState.scrollToItem(index = 0) }
                 }
               },
@@ -129,7 +131,7 @@ fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelect
       contentWindowInsets = WindowInsets.safeDrawing,
       topBar = {
       TopAppBar(
-        title = { Text(text = title) },
+        title = { Text(text = area.title) },
         modifier = Modifier.shadow(4.dp),
         windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         actions = {
@@ -139,12 +141,12 @@ fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelect
               scrollState.scrollToItem(0)
             }
           }) {
-            Icon(imageVector = Icons.Rounded.Refresh, contentDescription = "refresh")
+            Icon(imageVector = Icons.Rounded.Refresh, contentDescription = stringResource(id = R.string.content_description_refresh))
           }
         },
         navigationIcon = {
           IconButton(onClick = { openDrawer() }) {
-            Icon(Icons.Rounded.Menu, contentDescription = "home icon")
+            Icon(Icons.Rounded.Menu, contentDescription = stringResource(id = R.string.content_description_open_menu))
           }
         })
     }) { paddingValues ->
@@ -165,22 +167,7 @@ fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelect
             key = listItems.itemKey { it.key },
           ) { index ->
             val item = listItems[index] ?: return@items
-            Column(modifier = Modifier
-              .fillMaxWidth()
-              .clickable { openUrl(context, item.url) }
-              .padding(10.dp)) {
-              Text(
-                buildAnnotatedString {
-                  withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 16.sp)) { append("${item.difficulty} ") }
-                  withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 20.sp)) { append(item.className) }
-                }
-              )
-              RowView("신청기간", item.receivePeriod)
-              RowView("교육기간", "${item.educatePeriod} ${item.educateDays}")
-              RowView("잔여", item.remainNumber)
-              RowView("수강료", item.fee)
-              RowView("접수", item.howToRegister)
-            }
+            ClassRow(item = item, onClick = { openUrl(context, item.url) })
             HorizontalDivider()
           }
           when (listItems.loadState.append) {
@@ -192,6 +179,26 @@ fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelect
         }
       }
     }
+  }
+}
+
+@Composable
+fun ClassRow(item: RowItem, onClick: () -> Unit) {
+  Column(modifier = Modifier
+    .fillMaxWidth()
+    .clickable(onClick = onClick)
+    .padding(10.dp)) {
+    Text(
+      buildAnnotatedString {
+        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 16.sp)) { append("${item.difficulty} ") }
+        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 20.sp)) { append(item.className) }
+      }
+    )
+    RowView(stringResource(id = R.string.label_receive_period), item.receivePeriod)
+    RowView(stringResource(id = R.string.label_educate_period), item.educateSchedule)
+    RowView(stringResource(id = R.string.label_remain), item.remainNumber)
+    RowView(stringResource(id = R.string.label_fee), item.fee)
+    RowView(stringResource(id = R.string.label_register), item.howToRegister)
   }
 }
 

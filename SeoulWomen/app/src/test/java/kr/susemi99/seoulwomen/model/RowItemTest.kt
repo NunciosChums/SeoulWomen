@@ -15,8 +15,6 @@ import java.util.Locale
 class RowItemTest {
   private val json = Json {
     ignoreUnknownKeys = true
-    coerceInputValues = true
-    encodeDefaults = true
     isLenient = true
     serializersModule += SerializersModule {
       contextual(LocalDateSerializer)
@@ -129,31 +127,23 @@ class RowItemTest {
     assertEquals("2026-08-01(토) 09:00 ~\n2026-08-10(월) 24:00", item.receivePeriod)
   }
 
-  // educatePeriod
+  // educateSchedule
 
   @Test
-  fun `교육 시작일과 종료일이 다르면 범위로 표시한다`() {
-    assertEquals("2026-09-01(화) ~ 2026-09-30(수)", decode(body()).educatePeriod)
+  fun `교육 시작일과 종료일이 다르면 기간 요일 시간을 줄바꿈으로 표시한다`() {
+    assertEquals("$EDUCATE_RANGE\n월\n10:00 ~ 12:00", decode(body()).educateSchedule)
   }
 
   @Test
-  fun `교육 시작일과 종료일이 같으면 날짜 하나만 표시한다`() {
+  fun `하루짜리 교육은 날짜와 시간을 한 줄로 표시한다`() {
     val item = decode(body(educateFrom = "20260905", educateTo = "20260905"))
-    assertEquals("2026-09-05(토)", item.educatePeriod)
-  }
-
-  // educateDays
-
-  @Test
-  fun `하루짜리 교육은 시간만 표시한다`() {
-    val item = decode(body(educateFrom = "20260905", educateTo = "20260905"))
-    assertEquals("10:00 ~ 12:00", item.educateDays)
+    assertEquals("2026-09-05(토) 10:00 ~ 12:00", item.educateSchedule)
   }
 
   @Test
   fun `기간 교육은 요일과 시간을 표시한다`() {
     val item = decode(body(monday = "Y", wednesday = "Y", friday = "Y"))
-    assertEquals("\n월수금\n10:00 ~ 12:00", item.educateDays)
+    assertEquals("$EDUCATE_RANGE\n월수금\n10:00 ~ 12:00", item.educateSchedule)
   }
 
   @Test
@@ -161,13 +151,13 @@ class RowItemTest {
     val item = decode(
       body(monday = "Y", tuesday = "Y", wednesday = "Y", thursday = "Y", friday = "Y", saturday = "Y", sunday = "Y")
     )
-    assertEquals("\n월화수목금토일\n10:00 ~ 12:00", item.educateDays)
+    assertEquals("$EDUCATE_RANGE\n월화수목금토일\n10:00 ~ 12:00", item.educateSchedule)
   }
 
   @Test
   fun `요일 값이 빈 문자열이면 요일로 치지 않는다`() {
     val item = decode(body(monday = "", tuesday = " ", sunday = "Y"))
-    assertEquals("\n일\n10:00 ~ 12:00", item.educateDays)
+    assertEquals("$EDUCATE_RANGE\n일\n10:00 ~ 12:00", item.educateSchedule)
   }
 
   // API는 진행하지 않는 요일을 "N"으로 보낸다.
@@ -176,13 +166,13 @@ class RowItemTest {
     val item = decode(
       body(monday = "Y", tuesday = "Y", wednesday = "Y", thursday = "Y", friday = "Y", saturday = "N", sunday = "N")
     )
-    assertEquals("\n월화수목금\n10:00 ~ 12:00", item.educateDays)
+    assertEquals("$EDUCATE_RANGE\n월화수목금\n10:00 ~ 12:00", item.educateSchedule)
   }
 
   @Test
   fun `요일이 하나도 없으면 빈 요일 줄과 시간만 표시한다`() {
     val item = decode(body(monday = null))
-    assertEquals("\n\n10:00 ~ 12:00", item.educateDays)
+    assertEquals("$EDUCATE_RANGE\n\n10:00 ~ 12:00", item.educateSchedule)
   }
 
   // howToRegister
@@ -208,7 +198,11 @@ class RowItemTest {
   }
 
   @Test
-  fun `플래그가 Y도 N도 아니면 빈 문자열`() {
-    assertEquals("", decode(body(visitFlag = "", onlineFlag = "X")).howToRegister)
+  fun `플래그가 공백이나 알 수 없는 값이면 접수방법 확인`() {
+    assertEquals("접수방법 확인", decode(body(visitFlag = "", onlineFlag = "X")).howToRegister)
+  }
+
+  private companion object {
+    const val EDUCATE_RANGE = "2026-09-01(화) ~ 2026-09-30(수)"
   }
 }
