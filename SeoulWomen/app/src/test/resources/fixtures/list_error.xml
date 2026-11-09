@@ -1,0 +1,2 @@
+<RESULT><CODE>ERROR-336</CODE><MESSAGE><![CDATA[데이터요청은 한번에 최대 1000건을 넘을 수 없습니다.
+요청종료위치에서 요청시작위치를 뺀 값이 1000을 넘지 않도록 수정하세요.]]></MESSAGE></RESULT>

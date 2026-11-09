@@ -56,20 +56,30 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import kr.susemi99.seoulwomen.R
 import kr.susemi99.seoulwomen.api.ApiException
 import kr.susemi99.seoulwomen.enums.Area
+import kr.susemi99.seoulwomen.model.RowItem
 import kr.susemi99.seoulwomen.ui.theme.RowTitleColor
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScene() {
   val viewModel = hiltViewModel<MainViewModel>()
+  MainContent(
+    title = viewModel.title,
+    listItems = viewModel.list.collectAsLazyPagingItems(),
+    onAreaSelected = viewModel::selectedArea,
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelected: (Area) -> Unit) {
   val scrollState = rememberLazyListState()
-  val listItems = viewModel.list.collectAsLazyPagingItems()
   val scope = rememberCoroutineScope()
   val context = LocalContext.current
   val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -90,13 +100,13 @@ fun MainScene() {
           NavigationDrawerItem(
             icon = { Icon(Icons.Rounded.PlayArrow, contentDescription = null) },
             label = { Text(it.title) },
-            selected = it.title == viewModel.title,
+            selected = it.title == title,
             onClick = {
               closeDrawer()
-              if (it.title != viewModel.title) {
+              if (it.title != title) {
                 // 에러/빈 화면에서는 LazyColumn이 컴포지션에 없어 scrollToItem이 끝나지 않으므로
                 // 지역 변경을 먼저 동기로 처리하고 스크롤은 별도 코루틴에서 수행한다.
-                viewModel.selectedArea(it)
+                onAreaSelected(it)
                 listItems.refresh()
                 scope.launch { scrollState.scrollToItem(index = 0) }
               }
@@ -113,7 +123,7 @@ fun MainScene() {
       contentWindowInsets = WindowInsets.safeDrawing,
       topBar = {
       TopAppBar(
-        title = { Text(text = viewModel.title) },
+        title = { Text(text = title) },
         modifier = Modifier.shadow(4.dp),
         windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         actions = {

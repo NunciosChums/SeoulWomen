@@ -29,6 +29,13 @@ android {
       isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
+    // R8이 적용된 release와 같은 빌드를 debug 키로 서명해 기기에서 확인하기 위한 빌드 타입
+    create("releaseCheck") {
+      initWith(getByName("release"))
+      applicationIdSuffix = ".check"
+      signingConfig = signingConfigs.getByName("debug")
+      matchingFallbacks += "release"
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -54,6 +61,7 @@ dependencies {
   implementation(libs.androidx.material.icons.extended)
 
   testImplementation(libs.junit)
+  testImplementation(libs.androidx.paging.testing)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
   androidTestImplementation(platform(libs.androidx.compose.bom))

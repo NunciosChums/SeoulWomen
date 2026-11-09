@@ -55,8 +55,7 @@ data class WomenResourcesClassParentItem(
     override fun serialize(encoder: Encoder, value: WomenResourcesClassParentItem) =
       NormalizingSerializer.serialize(encoder, Surrogate(value.classItem, value.result))
   }
-
-  private companion object {
-    const val SERVICE_KEY = "service"
-  }
 }
+
+// companion object에 두면 생성되는 serializer()가 private 클래스에 속해 JVM의 리플렉션 조회가 실패한다.
+private const val SERVICE_KEY = "service"
