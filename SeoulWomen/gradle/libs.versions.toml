@@ -16,7 +16,7 @@ pagingCompose = "3.5.3"
 retrofit = "3.0.0"
 retrofit-json-converter = "1.0.0"
 hilt = "2.60.1"
-hiltNavigationCompose = "1.4.0"
+hiltLifecycleViewmodelCompose = "1.4.0"
 ksp = "2.3.13"
 timber = "5.0.1"
 
@@ -27,7 +27,7 @@ androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", 
 androidx-paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "pagingCompose" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+hilt-lifecycle-viewmodel-compose = { group = "androidx.hilt", name = "hilt-lifecycle-viewmodel-compose", version.ref = "hiltLifecycleViewmodelCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
