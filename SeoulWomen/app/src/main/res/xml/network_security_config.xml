@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <base-config cleartextTrafficPermitted="false" />
+  <!-- 서울 열린데이터 API는 HTTPS로 접속되지 않아(2026-11 기준) 이 도메인만 HTTP를 허용한다. -->
+  <domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="false">openapi.seoul.go.kr</domain>
+  </domain-config>
+</network-security-config>

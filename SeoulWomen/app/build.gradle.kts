@@ -56,22 +56,20 @@ fun readProperty(key: String): String {
 
 dependencies {
   implementation(libs.androidx.core.ktx)
-  implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
   implementation(libs.androidx.ui.graphics)
-  implementation(libs.androidx.ui.tooling.preview)
   implementation(libs.androidx.material3)
-  implementation(libs.androidx.material.icons.extended)
+  implementation(libs.androidx.material.icons.core)
 
   testImplementation(libs.junit)
   testImplementation(libs.androidx.paging.testing)
   androidTestImplementation(libs.androidx.junit)
+  // ui-test-junit4가 가져오는 3.5.0은 API 37에서 InputManager.getInstance 오류로 실패하므로 버전을 올려 둔다.
   androidTestImplementation(libs.androidx.espresso.core)
   androidTestImplementation(platform(libs.androidx.compose.bom))
   androidTestImplementation(libs.androidx.ui.test.junit4)
-  debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
 
   // api
@@ -81,12 +79,6 @@ dependencies {
 
   // json
   implementation(libs.kotlinx.serialization.json)
-
-  // logcat
-  implementation(libs.timber)
-
-  // view model
-  implementation(libs.androidx.lifecycle.viewmodel.compose)
 
   // pagination
   implementation(libs.androidx.paging.compose)
