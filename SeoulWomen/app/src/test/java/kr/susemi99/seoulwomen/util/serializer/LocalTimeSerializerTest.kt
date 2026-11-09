@@ -1,14 +1,24 @@
 package kr.susemi99.seoulwomen.util.serializer
 
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalTime
 import java.time.format.DateTimeParseException
 
 class LocalTimeSerializerTest {
   private val json = Json
+
+  /** kotlinx.serialization 1.12부터 deserializer의 예외는 SerializationException으로 감싸져 전달된다 */
+  private fun assertParseFails(jsonString: String) {
+    val exception = assertThrows(SerializationException::class.java) {
+      json.decodeFromString(LocalTimeSerializer, jsonString)
+    }
+    assertTrue(exception.cause is DateTimeParseException)
+  }
 
   @Test
   fun `HH mm 문자열을 LocalTime으로 변환한다`() {
@@ -28,16 +38,12 @@ class LocalTimeSerializerTest {
 
   @Test
   fun `초가 포함된 형식은 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalTimeSerializer, "\"09:30:00\"")
-    }
+    assertParseFails("\"09:30:00\"")
   }
 
   @Test
   fun `한 자리 시간은 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalTimeSerializer, "\"9:30\"")
-    }
+    assertParseFails("\"9:30\"")
   }
 
   @Test
@@ -48,22 +54,16 @@ class LocalTimeSerializerTest {
 
   @Test
   fun `범위를 벗어난 시간은 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalTimeSerializer, "\"25:00\"")
-    }
+    assertParseFails("\"25:00\"")
   }
 
   @Test
   fun `범위를 벗어난 분은 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalTimeSerializer, "\"10:60\"")
-    }
+    assertParseFails("\"10:60\"")
   }
 
   @Test
   fun `빈 문자열은 실패한다`() {
-    assertThrows(DateTimeParseException::class.java) {
-      json.decodeFromString(LocalTimeSerializer, "\"\"")
-    }
+    assertParseFails("\"\"")
   }
 }
