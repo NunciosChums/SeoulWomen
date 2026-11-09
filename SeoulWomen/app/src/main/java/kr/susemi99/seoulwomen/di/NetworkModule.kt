@@ -11,6 +11,7 @@ import kotlinx.serialization.modules.contextual
 import kotlinx.serialization.modules.plus
 import kr.susemi99.seoulwomen.BuildConfig
 import kr.susemi99.seoulwomen.api.Api
+import kr.susemi99.seoulwomen.api.XmlErrorConverterFactory
 import kr.susemi99.seoulwomen.util.serializer.LocalDateSerializer
 import kr.susemi99.seoulwomen.util.serializer.LocalTimeSerializer
 import okhttp3.MediaType.Companion.toMediaType
@@ -50,6 +51,7 @@ object NetworkModule {
   @Singleton
   fun provideRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit =
     Retrofit.Builder().apply {
+      addConverterFactory(XmlErrorConverterFactory())
       addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
       baseUrl("http://openapi.seoul.go.kr:8088/${BuildConfig.API_KEY}/json/")
       client(okHttpClient)

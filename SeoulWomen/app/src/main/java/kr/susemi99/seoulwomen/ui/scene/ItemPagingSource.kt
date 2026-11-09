@@ -31,7 +31,7 @@ class ItemPagingSource(
     return try {
       val result = api.list(startIndex = startIndex, endIndex = endIndex, areaValue = areaClassName)
       result.resultItem?.let {
-        if (it.code != ApiException.SUCCESS_CODE) throw ApiException(it.code, it.message)
+        if (it.code != ApiException.SUCCESS_CODE && it.code != ApiException.NO_DATA_CODE) throw ApiException(it.code, it.message)
       }
       val totalCount = result.classItem?.listTotalCount ?: 0
       LoadResult.Page(

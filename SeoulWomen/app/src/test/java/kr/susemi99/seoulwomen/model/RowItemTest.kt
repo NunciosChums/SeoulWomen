@@ -165,6 +165,15 @@ class RowItemTest {
     assertEquals("\n일\n10:00 ~ 12:00", item.educateDays)
   }
 
+  // API는 진행하지 않는 요일을 "N"으로 보낸다.
+  @Test
+  fun `진행하지 않는 요일 N은 표시하지 않는다`() {
+    val item = decode(
+      body(monday = "Y", tuesday = "Y", wednesday = "Y", thursday = "Y", friday = "Y", saturday = "N", sunday = "N")
+    )
+    assertEquals("\n월화수목금\n10:00 ~ 12:00", item.educateDays)
+  }
+
   @Test
   fun `요일이 하나도 없으면 빈 요일 줄과 시간만 표시한다`() {
     val item = decode(body(monday = null))
