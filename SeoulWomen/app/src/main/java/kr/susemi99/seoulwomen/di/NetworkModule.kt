@@ -13,7 +13,6 @@ import kr.susemi99.seoulwomen.BuildConfig
 import kr.susemi99.seoulwomen.api.Api
 import kr.susemi99.seoulwomen.api.XmlErrorConverterFactory
 import kr.susemi99.seoulwomen.util.serializer.LocalDateSerializer
-import kr.susemi99.seoulwomen.util.serializer.LocalTimeSerializer
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -42,7 +41,6 @@ object NetworkModule {
 
       serializersModule += SerializersModule {
         contextual(LocalDateSerializer)
-        contextual(LocalTimeSerializer)
       }
     }
   }

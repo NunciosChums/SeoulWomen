@@ -10,7 +10,6 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import java.time.LocalDate
-import java.time.LocalTime
 
 /** `src/test/resources/fixtures` 에 저장한 실제 API 응답을 읽는다. */
 fun fixture(name: String): String =
@@ -48,12 +47,12 @@ fun rowItem(classCode: String = "C1") = RowItem(
   difficultyName = "초급",
   receiveFrom = LocalDate.of(2026, 3, 2),
   receiveTo = LocalDate.of(2026, 3, 6),
-  receiveTimeFrom = LocalTime.of(9, 0),
-  receiveTimeTo = LocalTime.of(18, 0),
+  receiveTimeFrom = "09:00",
+  receiveTimeTo = "18:00",
   educateFrom = LocalDate.of(2026, 3, 9),
   educateTo = LocalDate.of(2026, 3, 13),
-  educateTimeFrom = LocalTime.of(14, 0),
-  educateTimeTo = LocalTime.of(17, 0),
+  educateTimeFrom = "14:00",
+  educateTimeTo = "17:00",
   monday = "Y",
   tuesday = "N",
   wednesday = "Y",

@@ -6,34 +6,38 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalTime
 import java.time.format.DateTimeParseException
 
-class LocalTimeSerializerTest {
+class TimeTextSerializerTest {
   private val json = Json
 
   /** kotlinx.serialization 1.12부터 deserializer의 예외는 SerializationException으로 감싸져 전달된다 */
   private fun assertParseFails(jsonString: String) {
     val exception = assertThrows(SerializationException::class.java) {
-      json.decodeFromString(LocalTimeSerializer, jsonString)
+      json.decodeFromString(TimeTextSerializer, jsonString)
     }
     assertTrue(exception.cause is DateTimeParseException)
   }
 
   @Test
-  fun `HH mm 문자열을 LocalTime으로 변환한다`() {
-    assertEquals(LocalTime.of(9, 30), json.decodeFromString(LocalTimeSerializer, "\"09:30\""))
+  fun `HH mm 문자열을 그대로 읽는다`() {
+    assertEquals("09:30", json.decodeFromString(TimeTextSerializer, "\"09:30\""))
   }
 
   @Test
-  fun `경계값 00 00 과 23 59 를 변환한다`() {
-    assertEquals(LocalTime.MIDNIGHT, json.decodeFromString(LocalTimeSerializer, "\"00:00\""))
-    assertEquals(LocalTime.of(23, 59), json.decodeFromString(LocalTimeSerializer, "\"23:59\""))
+  fun `경계값 00 00 과 23 59 를 읽는다`() {
+    assertEquals("00:00", json.decodeFromString(TimeTextSerializer, "\"00:00\""))
+    assertEquals("23:59", json.decodeFromString(TimeTextSerializer, "\"23:59\""))
   }
 
   @Test
-  fun `HH mm 형식으로 직렬화한다`() {
-    assertEquals("\"09:30\"", json.encodeToString(LocalTimeSerializer, LocalTime.of(9, 30)))
+  fun `24 00 은 00 00 으로 바뀌지 않고 그대로 보존한다`() {
+    assertEquals("24:00", json.decodeFromString(TimeTextSerializer, "\"24:00\""))
+  }
+
+  @Test
+  fun `읽은 값과 같은 형식으로 직렬화한다`() {
+    assertEquals("\"24:00\"", json.encodeToString(TimeTextSerializer, "24:00"))
   }
 
   @Test
@@ -44,12 +48,6 @@ class LocalTimeSerializerTest {
   @Test
   fun `한 자리 시간은 실패한다`() {
     assertParseFails("\"9:30\"")
-  }
-
-  @Test
-  fun `24 00 은 SMART 해석으로 자정이 된다`() {
-    // DateTimeFormatter 기본 ResolverStyle.SMART 동작
-    assertEquals(LocalTime.MIDNIGHT, json.decodeFromString(LocalTimeSerializer, "\"24:00\""))
   }
 
   @Test

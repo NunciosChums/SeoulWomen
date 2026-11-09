@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -31,6 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -64,7 +67,7 @@ import kr.susemi99.seoulwomen.R
 import kr.susemi99.seoulwomen.api.ApiException
 import kr.susemi99.seoulwomen.enums.Area
 import kr.susemi99.seoulwomen.model.RowItem
-import kr.susemi99.seoulwomen.ui.theme.RowTitleColor
+import java.io.IOException
 
 @Composable
 fun MainScene() {
@@ -95,24 +98,27 @@ fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelect
   ModalNavigationDrawer(
     drawerContent = {
       ModalDrawerSheet {
-        Spacer(Modifier.height(12.dp))
-        Area.entries.forEach {
-          NavigationDrawerItem(
-            icon = { Icon(Icons.Rounded.PlayArrow, contentDescription = null) },
-            label = { Text(it.title) },
-            selected = it.title == title,
-            onClick = {
-              closeDrawer()
-              if (it.title != title) {
-                // 에러/빈 화면에서는 LazyColumn이 컴포지션에 없어 scrollToItem이 끝나지 않으므로
-                // 지역 변경을 먼저 동기로 처리하고 스크롤은 별도 코루틴에서 수행한다.
-                onAreaSelected(it)
-                listItems.refresh()
-                scope.launch { scrollState.scrollToItem(index = 0) }
-              }
-            },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-          )
+        // 항목 전체 높이가 화면보다 큰 가로 모드에서도 모든 센터를 고를 수 있게 한다.
+        Column(Modifier.verticalScroll(rememberScrollState())) {
+          Spacer(Modifier.height(12.dp))
+          Area.entries.forEach {
+            NavigationDrawerItem(
+              icon = { Icon(Icons.Rounded.PlayArrow, contentDescription = null) },
+              label = { Text(it.title) },
+              selected = it.title == title,
+              onClick = {
+                closeDrawer()
+                if (it.title != title) {
+                  // 에러/빈 화면에서는 LazyColumn이 컴포지션에 없어 scrollToItem이 끝나지 않으므로
+                  // 지역 변경을 먼저 동기로 처리하고 스크롤은 별도 코루틴에서 수행한다.
+                  onAreaSelected(it)
+                  listItems.refresh()
+                  scope.launch { scrollState.scrollToItem(index = 0) }
+                }
+              },
+              modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+          }
         }
       }
     },
@@ -165,8 +171,8 @@ fun MainContent(title: String, listItems: LazyPagingItems<RowItem>, onAreaSelect
               .padding(10.dp)) {
               Text(
                 buildAnnotatedString {
-                  withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 16.sp)) { append("${item.difficulty} ") }
-                  withStyle(style = SpanStyle(color = RowTitleColor, fontSize = 20.sp)) { append(item.className) }
+                  withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 16.sp)) { append("${item.difficulty} ") }
+                  withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 20.sp)) { append(item.className) }
                 }
               )
               RowView("신청기간", item.receivePeriod)
@@ -263,7 +269,8 @@ fun AppendErrorView(onRetry: () -> Unit) {
 fun ErrorView(throwable: Throwable, onRetry: () -> Unit, modifier: Modifier = Modifier) {
   val message = when (throwable) {
     is ApiException -> "${throwable.message} (${throwable.code})"
-    else -> throwable.localizedMessage ?: stringResource(id = R.string.error_unknown)
+    is IOException -> stringResource(id = R.string.error_network)
+    else -> stringResource(id = R.string.error_unknown)
   }
   Column(
     verticalArrangement = Arrangement.Center,
