@@ -2,6 +2,7 @@ package kr.susemi99.seoulwomen.ui.scene
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import kotlinx.coroutines.CancellationException
 import kr.susemi99.seoulwomen.api.Api
 import kr.susemi99.seoulwomen.api.ApiException
 import kr.susemi99.seoulwomen.model.RowItem
@@ -38,6 +39,8 @@ class ItemPagingSource(
         prevKey = if (page == 0) null else page - 1,
         nextKey = if (endIndex < totalCount) page + 1 else null,
       )
+    } catch (e: CancellationException) {
+      throw e
     } catch (e: Exception) {
       LoadResult.Error(e)
     }

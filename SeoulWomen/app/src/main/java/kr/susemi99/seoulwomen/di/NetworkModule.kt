@@ -32,11 +32,9 @@ object NetworkModule {
 
   @Provides
   @Singleton
-  fun provideConverterFactory(): Json {
+  fun provideJson(): Json {
     return Json {
       ignoreUnknownKeys = true
-      coerceInputValues = true
-      encodeDefaults = true
       isLenient = true
 
       serializersModule += SerializersModule {

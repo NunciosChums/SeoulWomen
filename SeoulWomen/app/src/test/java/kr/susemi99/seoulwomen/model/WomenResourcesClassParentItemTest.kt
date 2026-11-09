@@ -8,7 +8,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class WomenResourcesClassParentItemTest {
-  private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true; isLenient = true }
+  private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
   @Test
   fun `모든 센터 키를 classItem으로 읽는다`() {

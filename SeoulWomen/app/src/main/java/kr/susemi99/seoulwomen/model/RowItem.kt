@@ -61,34 +61,27 @@ data class RowItem(
     }
 
   /**
-   * 교육 기간
+   * 교육 일정: 하루짜리는 날짜와 시간, 기간 교육은 기간·요일·시간을 줄바꿈으로 구분
    */
-  val educatePeriod
+  val educateSchedule
     get() = if (educateFrom == educateTo) {
-      "$educateFrom(${educateFrom.dayName})"
+      "$educateFrom(${educateFrom.dayName}) $educateTime"
     } else {
-      "$educateFrom(${educateFrom.dayName}) ~ $educateTo(${educateTo.dayName})"
+      "$educateFrom(${educateFrom.dayName}) ~ $educateTo(${educateTo.dayName})\n$educateWeekdays\n$educateTime"
     }
 
   /**
-   * 교육 요일, 시간
+   * 교육 요일
    */
-  val educateDays
-    get() = if (educateFrom == educateTo) {
-      educateTime
-    } else {
-      StringBuilder().apply {
-        append("\n")
-        if (monday == "Y") append("월")
-        if (tuesday == "Y") append("화")
-        if (wednesday == "Y") append("수")
-        if (thursday == "Y") append("목")
-        if (friday == "Y") append("금")
-        if (saturday == "Y") append("토")
-        if (sunday == "Y") append("일")
-        append("\n")
-        append(educateTime)
-      }.toString()
+  private val educateWeekdays
+    get() = buildString {
+      if (monday == "Y") append("월")
+      if (tuesday == "Y") append("화")
+      if (wednesday == "Y") append("수")
+      if (thursday == "Y") append("목")
+      if (friday == "Y") append("금")
+      if (saturday == "Y") append("토")
+      if (sunday == "Y") append("일")
     }
 
   /**
@@ -117,9 +110,8 @@ data class RowItem(
    * 접수 방법
    */
   val howToRegister
-    get() = mutableListOf<String>().apply {
+    get() = buildList {
       if (visitReceiveFlag == "Y") add("방문")
       if (onlineReceiveFlag == "Y") add("온라인")
-      if (listOf(visitReceiveFlag, onlineReceiveFlag).all { it == "N" }) add("접수방법 확인")
-    }.joinToString()
+    }.joinToString().ifEmpty { "접수방법 확인" }
 }

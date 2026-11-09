@@ -31,8 +31,8 @@ class LocalDateSerializerTest {
   }
 
   @Test
-  fun `ISO 형식으로 직렬화한다`() {
-    assertEquals("\"2026-08-22\"", json.encodeToString(LocalDateSerializer, LocalDate.of(2026, 8, 22)))
+  fun `읽은 값과 같은 yyyyMMdd 형식으로 직렬화한다`() {
+    assertEquals("\"20260822\"", json.encodeToString(LocalDateSerializer, LocalDate.of(2026, 8, 22)))
   }
 
   @Test
