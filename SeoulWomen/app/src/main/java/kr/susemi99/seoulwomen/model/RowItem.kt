@@ -3,10 +3,14 @@ package kr.susemi99.seoulwomen.model
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kr.susemi99.seoulwomen.extension.dayName
+import kr.susemi99.seoulwomen.extension.shortText
+import kr.susemi99.seoulwomen.extension.shortTextWithDay
 import kr.susemi99.seoulwomen.util.serializer.DecimalIntSerializer
 import kr.susemi99.seoulwomen.util.serializer.TimeTextSerializer
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 
 @Serializable
 data class RowItem(
@@ -45,73 +49,99 @@ data class RowItem(
     get() = "$organCode-$classCode"
 
   /**
-   * 난이도
+   * 접수 상태. 마감 시각이 지났으면 마감일 당일이라도 [ReceiveStatus.Closed]다.
    */
-  val difficulty
-    get() = "[${difficultyName}]"
+  fun receiveStatus(now: LocalDateTime): ReceiveStatus = when {
+    now < receiveFrom.atTimeText(receiveTimeFrom) -> ReceiveStatus.Upcoming
+    now >= receiveTo.atTimeText(receiveTimeTo) -> ReceiveStatus.Closed
+    else -> ReceiveStatus.Open(daysLeft = ChronoUnit.DAYS.between(now.toLocalDate(), receiveTo).toInt())
+  }
 
   /**
-   * 신청 기간
+   * 신청 기간. 예: `11.2(월) 09:00 ~ 11.13(금) 18:00`
    */
-  val receivePeriod
-    get() = if (receiveFrom == receiveTo) {
-      "$receiveFrom(${receiveFrom.dayName}) $receiveTimeFrom ~ $receiveTimeTo"
-    } else {
-      "$receiveFrom(${receiveFrom.dayName}) $receiveTimeFrom ~\n$receiveTo(${receiveTo.dayName}) $receiveTimeTo"
-    }
+  fun receivePeriod(today: LocalDate) = if (receiveFrom == receiveTo) {
+    "${receiveFrom.shortTextWithDay(today)} $receiveTimeFrom~$receiveTimeTo"
+  } else {
+    "${receiveFrom.shortTextWithDay(today)} $receiveTimeFrom ~ ${receiveTo.shortTextWithDay(today)} $receiveTimeTo"
+  }
 
   /**
-   * 교육 일정: 하루짜리는 날짜와 시간, 기간 교육은 기간·요일·시간을 줄바꿈으로 구분
+   * 교육 일정. 하루짜리는 `9.5(토) 10:00~12:00`, 기간 교육은 `11.16 ~ 12.18 · 월·수·금 10:00~12:00`
    */
-  val educateSchedule
-    get() = if (educateFrom == educateTo) {
-      "$educateFrom(${educateFrom.dayName}) $educateTime"
-    } else {
-      "$educateFrom(${educateFrom.dayName}) ~ $educateTo(${educateTo.dayName})\n$educateWeekdays\n$educateTime"
-    }
+  fun educateSchedule(today: LocalDate) = if (educateFrom == educateTo) {
+    "${educateFrom.shortTextWithDay(today)} $educateTime"
+  } else {
+    val weekdaysAndTime = listOf(educateWeekdays, educateTime).filter { it.isNotEmpty() }.joinToString(" ")
+    "${educateFrom.shortText(today)} ~ ${educateTo.shortText(today)} · $weekdaysAndTime"
+  }
 
   /**
    * 교육 요일
    */
   private val educateWeekdays
-    get() = buildString {
-      if (monday == "Y") append("월")
-      if (tuesday == "Y") append("화")
-      if (wednesday == "Y") append("수")
-      if (thursday == "Y") append("목")
-      if (friday == "Y") append("금")
-      if (saturday == "Y") append("토")
-      if (sunday == "Y") append("일")
-    }
+    get() = buildList {
+      if (monday == "Y") add("월")
+      if (tuesday == "Y") add("화")
+      if (wednesday == "Y") add("수")
+      if (thursday == "Y") add("목")
+      if (friday == "Y") add("금")
+      if (saturday == "Y") add("토")
+      if (sunday == "Y") add("일")
+    }.joinToString("·")
 
   /**
    * 교육 시간
    */
   private val educateTime
-    get() = "$educateTimeFrom ~ $educateTimeTo"
+    get() = "$educateTimeFrom~$educateTimeTo"
 
   /**
-   * 잔여
+   * 남은 자리가 없음
    */
-  val remainNumber
-    get() = "$spareNum/${collectNum}명"
+  val isFull
+    get() = spareNum <= 0
+
+  /**
+   * 남은 자리가 정원의 20% 이하
+   */
+  val isAlmostFull
+    get() = !isFull && spareNum * 5 <= collectNum
+
+  /**
+   * 정원 대비 신청 인원 비율(0~1)
+   */
+  val enrolledRatio: Float
+    get() = when {
+      isFull -> 1f
+      collectNum <= 0 -> 0f
+      else -> ((collectNum - spareNum).toFloat() / collectNum).coerceIn(0f, 1f)
+    }
+
+  /**
+   * 무료 강좌
+   */
+  val isFree
+    get() = educateFee <= 0
 
   /**
    * 수강료
    */
   val fee
-    get() = if (educateFee > 0) {
-      "%,d원".format(educateFee)
-    } else {
-      "무료"
-    }
+    get() = if (isFree) "무료" else "%,d원".format(educateFee)
 
   /**
    * 접수 방법
    */
-  val howToRegister
+  val registerMethods
     get() = buildList {
       if (visitReceiveFlag == "Y") add("방문")
       if (onlineReceiveFlag == "Y") add("온라인")
-    }.joinToString().ifEmpty { "접수방법 확인" }
+    }.ifEmpty { listOf("접수방법 확인") }
 }
+
+/**
+ * "HH:mm" 문자열을 이 날짜의 시각으로 바꾼다. 자정 마감을 뜻하는 "24:00"은 다음 날 0시로 본다.
+ */
+private fun LocalDate.atTimeText(time: String): LocalDateTime =
+  if (time == "24:00") plusDays(1).atStartOfDay() else atTime(LocalTime.parse(time))
