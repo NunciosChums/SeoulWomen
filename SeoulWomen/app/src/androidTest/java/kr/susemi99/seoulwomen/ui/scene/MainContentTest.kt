@@ -26,6 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 /** 네트워크 없이 목록 화면의 상태별 표시와 드로어 동작을 확인한다. */
 @RunWith(AndroidJUnit4::class)
@@ -40,7 +41,10 @@ class MainContentTest {
   private val otherArea = Area.Dongjak
   private val selectedAreas = mutableListOf<Area>()
 
-  private fun show(data: PagingData<RowItem>) {
+  // row의 접수 기간(3.2 09:00 ~ 3.6 18:00) 안, 마감 이틀 전
+  private val duringReceive = LocalDateTime.of(2026, 3, 4, 10, 0)
+
+  private fun show(data: PagingData<RowItem>, now: LocalDateTime = duringReceive) {
     val flow = flowOf(data)
     composeRule.setContent {
       SeoulWomenTheme {
@@ -48,9 +52,14 @@ class MainContentTest {
           area = currentArea,
           listItems = flow.collectAsLazyPagingItems(),
           onAreaSelected = { selectedAreas += it },
+          clock = { now },
         )
       }
     }
+  }
+
+  private fun showRow(item: RowItem = row, now: LocalDateTime = duringReceive) {
+    show(PagingData.from(listOf(item), sourceLoadStates = loaded), now)
   }
 
   private fun emptyResult() = PagingData.empty<RowItem>(loaded)
@@ -71,11 +80,65 @@ class MainContentTest {
 
     // 닫힌 드로어에도 같은 제목의 항목이 있으므로 클릭할 수 없는 상단바 제목만 찾는다.
     composeRule.onNode(hasText(currentArea.title) and !hasClickAction()).assertIsDisplayed()
-    composeRule.onNodeWithText("[초급] 테스트 강좌").assertIsDisplayed()
-    composeRule.onNodeWithText("${context.getString(R.string.label_receive_period)}: ").assertIsDisplayed()
-    composeRule.onNodeWithText("5/20명").assertIsDisplayed()
+    composeRule.onNodeWithText("테스트 강좌").assertIsDisplayed()
+    composeRule.onNodeWithText("초급").assertIsDisplayed()
+    composeRule.onNodeWithText(context.getString(R.string.label_receive_period)).assertIsDisplayed()
+    composeRule.onNodeWithText("3.2(월) 09:00 ~ 3.6(금) 18:00").assertIsDisplayed()
+    composeRule.onNodeWithText(context.getString(R.string.label_educate_period)).assertIsDisplayed()
+    composeRule.onNodeWithText("3.9 ~ 3.13 · 월·수·금 14:00~17:00").assertIsDisplayed()
+    composeRule.onNodeWithText("5자리 남음 / 20명").assertIsDisplayed()
     composeRule.onNodeWithText("100,000원").assertIsDisplayed()
-    composeRule.onNodeWithText("방문, 온라인").assertIsDisplayed()
+    composeRule.onNodeWithText("방문").assertIsDisplayed()
+    composeRule.onNodeWithText("온라인").assertIsDisplayed()
+  }
+
+  @Test
+  fun 접수_시작_전이면_접수_예정을_표시한다() {
+    showRow(now = LocalDateTime.of(2026, 3, 1, 10, 0))
+
+    composeRule.onNodeWithText(context.getString(R.string.status_upcoming)).assertIsDisplayed()
+  }
+
+  @Test
+  fun 마감이_가까우면_남은_날_수를_표시한다() {
+    showRow()
+
+    composeRule.onNodeWithText(context.getString(R.string.status_closing_days, 2)).assertIsDisplayed()
+  }
+
+  @Test
+  fun 마감이_멀면_접수_중을_표시한다() {
+    showRow(item = row.copy(receiveTo = LocalDate.of(2026, 3, 31)))
+
+    composeRule.onNodeWithText(context.getString(R.string.status_open)).assertIsDisplayed()
+  }
+
+  @Test
+  fun 마감일_당일이면_오늘_마감을_표시한다() {
+    showRow(now = LocalDateTime.of(2026, 3, 6, 10, 0))
+
+    composeRule.onNodeWithText(context.getString(R.string.status_closing_today)).assertIsDisplayed()
+  }
+
+  @Test
+  fun 접수_기간이_지나면_접수_마감을_표시한다() {
+    showRow(now = LocalDateTime.of(2026, 3, 6, 18, 0))
+
+    composeRule.onNodeWithText(context.getString(R.string.status_closed)).assertIsDisplayed()
+  }
+
+  @Test
+  fun 남은_자리가_없으면_정원_마감을_표시한다() {
+    showRow(item = row.copy(spareNum = 0))
+
+    composeRule.onNodeWithText("${context.getString(R.string.remain_full)} / 20명").assertIsDisplayed()
+  }
+
+  @Test
+  fun 무료_강좌는_무료로_표시한다() {
+    showRow(item = row.copy(educateFee = 0))
+
+    composeRule.onNodeWithText("무료").assertIsDisplayed()
   }
 
   @Test
@@ -129,7 +192,7 @@ class MainContentTest {
     val appendError = LoadStates(refresh = notLoading, prepend = notLoading, append = LoadState.Error(IOException("오류")))
     show(PagingData.from(listOf(row), sourceLoadStates = appendError))
 
-    composeRule.onNodeWithText("[초급] 테스트 강좌").assertIsDisplayed()
+    composeRule.onNodeWithText("테스트 강좌").assertIsDisplayed()
     composeRule.onNodeWithText(context.getString(R.string.error_title)).assertIsDisplayed()
     composeRule.onNodeWithText(context.getString(R.string.retry)).assertIsDisplayed()
   }

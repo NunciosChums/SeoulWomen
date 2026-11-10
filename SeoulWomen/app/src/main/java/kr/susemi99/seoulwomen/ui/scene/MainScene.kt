@@ -3,24 +3,28 @@ package kr.susemi99.seoulwomen.ui.scene
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
@@ -45,11 +49,16 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -68,8 +77,10 @@ import kotlinx.coroutines.launch
 import kr.susemi99.seoulwomen.R
 import kr.susemi99.seoulwomen.api.ApiException
 import kr.susemi99.seoulwomen.enums.Area
+import kr.susemi99.seoulwomen.model.ReceiveStatus
 import kr.susemi99.seoulwomen.model.RowItem
 import java.io.IOException
+import java.time.LocalDateTime
 
 @Composable
 fun MainScene() {
@@ -84,7 +95,12 @@ fun MainScene() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainContent(area: Area, listItems: LazyPagingItems<RowItem>, onAreaSelected: (Area) -> Unit) {
+fun MainContent(
+  area: Area,
+  listItems: LazyPagingItems<RowItem>,
+  onAreaSelected: (Area) -> Unit,
+  clock: () -> LocalDateTime = { LocalDateTime.now() },
+) {
   val scrollState = rememberLazyListState()
   val scope = rememberCoroutineScope()
   val context = LocalContext.current
@@ -151,6 +167,8 @@ fun MainContent(area: Area, listItems: LazyPagingItems<RowItem>, onAreaSelected:
         })
     }) { paddingValues ->
       val refreshState = listItems.loadState.refresh
+      // 접수 상태의 기준 시각. 새로고침할 때마다 다시 읽어 오래 켜 둔 화면에서도 상태가 어긋나지 않게 한다.
+      val now = remember(refreshState) { clock() }
       when {
         refreshState is LoadState.Loading -> LoadingView(modifier = Modifier.padding(paddingValues))
         refreshState is LoadState.Error -> ErrorView(
@@ -167,7 +185,7 @@ fun MainContent(area: Area, listItems: LazyPagingItems<RowItem>, onAreaSelected:
             key = listItems.itemKey { it.key },
           ) { index ->
             val item = listItems[index] ?: return@items
-            ClassRow(item = item, onClick = { openUrl(context, item.url) })
+            ClassRow(item = item, now = now, onClick = { openUrl(context, item.url) })
             HorizontalDivider()
           }
           when (listItems.loadState.append) {
@@ -183,22 +201,164 @@ fun MainContent(area: Area, listItems: LazyPagingItems<RowItem>, onAreaSelected:
 }
 
 @Composable
-fun ClassRow(item: RowItem, onClick: () -> Unit) {
-  Column(modifier = Modifier
-    .fillMaxWidth()
-    .clickable(onClick = onClick)
-    .padding(10.dp)) {
+fun ClassRow(item: RowItem, now: LocalDateTime, onClick: () -> Unit) {
+  val today = now.toLocalDate()
+  val status = item.receiveStatus(now)
+  // 더 신청할 수 없는 강좌는 흐리게 표시하되, 내용을 확인할 수 있도록 누를 수는 있게 둔다.
+  val inactive = status == ReceiveStatus.Closed || item.isFull
+  val neutral = TagColors(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.onSurfaceVariant)
+
+  Column(
+    verticalArrangement = Arrangement.spacedBy(6.dp),
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable(onClickLabel = stringResource(id = R.string.action_open_web), onClick = onClick)
+      .alpha(if (inactive) INACTIVE_ALPHA else 1f)
+      .padding(horizontal = 16.dp, vertical = 14.dp)
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+      Tag(text = statusText(status), colors = if (inactive) neutral else statusColors(status))
+      if (item.difficultyName.isNotBlank()) {
+        Tag(text = item.difficultyName, colors = neutral)
+      }
+      Spacer(Modifier.weight(1f))
+      Icon(
+        painter = painterResource(id = R.drawable.ic_open_in_new),
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.size(18.dp)
+      )
+    }
     Text(
-      buildAnnotatedString {
-        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 16.sp)) { append("${item.difficulty} ") }
-        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 20.sp)) { append(item.className) }
+      text = item.className,
+      style = MaterialTheme.typography.titleLarge,
+      fontWeight = FontWeight.SemiBold,
+      modifier = Modifier.padding(top = 2.dp)
+    )
+    InfoRow(label = stringResource(id = R.string.label_receive_period), value = item.receivePeriod(today))
+    InfoRow(label = stringResource(id = R.string.label_educate_period), value = item.educateSchedule(today))
+    // 글꼴을 키워 한 줄에 다 들어가지 않으면 칩 묶음이 다음 줄로 내려간다.
+    FlowRow(
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalArrangement = Arrangement.spacedBy(6.dp),
+      itemVerticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 4.dp)
+    ) {
+      RemainText(item = item, inactive = inactive)
+      Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        val freeColors = TagColors(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+        Tag(text = item.fee, colors = if (item.isFree && !inactive) freeColors else neutral)
+        item.registerMethods.forEach { Tag(text = it, colors = neutral) }
+      }
+    }
+    EnrollBar(
+      ratio = item.enrolledRatio,
+      color = when {
+        inactive -> MaterialTheme.colorScheme.outline
+        item.isAlmostFull -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.primary
       }
     )
-    RowView(stringResource(id = R.string.label_receive_period), item.receivePeriod)
-    RowView(stringResource(id = R.string.label_educate_period), item.educateSchedule)
-    RowView(stringResource(id = R.string.label_remain), item.remainNumber)
-    RowView(stringResource(id = R.string.label_fee), item.fee)
-    RowView(stringResource(id = R.string.label_register), item.howToRegister)
+  }
+}
+
+private const val INACTIVE_ALPHA = 0.6f
+
+/** 마감까지 이 날 수 이하로 남으면 "접수 중" 대신 남은 날 수를 보여 준다. */
+private const val CLOSING_SOON_DAYS = 7
+
+/** 마감까지 이 날 수 이하로 남으면 배지를 경고색으로 바꾼다. */
+private const val CLOSING_URGENT_DAYS = 3
+
+private data class TagColors(val container: Color, val content: Color)
+
+@Composable
+private fun statusText(status: ReceiveStatus) = when (status) {
+  ReceiveStatus.Upcoming -> stringResource(id = R.string.status_upcoming)
+  ReceiveStatus.Closed -> stringResource(id = R.string.status_closed)
+  is ReceiveStatus.Open -> when {
+    status.daysLeft <= 0 -> stringResource(id = R.string.status_closing_today)
+    status.daysLeft <= CLOSING_SOON_DAYS -> stringResource(id = R.string.status_closing_days, status.daysLeft)
+    else -> stringResource(id = R.string.status_open)
+  }
+}
+
+@Composable
+private fun statusColors(status: ReceiveStatus) = when {
+  status is ReceiveStatus.Open && status.daysLeft <= CLOSING_URGENT_DAYS ->
+    TagColors(MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
+  status is ReceiveStatus.Open -> TagColors(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+  else -> TagColors(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
+}
+
+@Composable
+private fun Tag(text: String, colors: TagColors) {
+  Text(
+    text = text,
+    style = MaterialTheme.typography.labelLarge,
+    color = colors.content,
+    maxLines = 1,
+    modifier = Modifier
+      .background(color = colors.container, shape = RoundedCornerShape(6.dp))
+      .padding(horizontal = 8.dp, vertical = 3.dp)
+  )
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+  Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    Text(
+      text = label,
+      style = MaterialTheme.typography.bodyMedium,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.alignByBaseline()
+    )
+    Text(
+      text = value,
+      style = MaterialTheme.typography.bodyLarge,
+      modifier = Modifier.alignByBaseline()
+    )
+  }
+}
+
+@Composable
+private fun RemainText(item: RowItem, inactive: Boolean) {
+  val remain = if (item.isFull) {
+    stringResource(id = R.string.remain_full)
+  } else {
+    stringResource(id = R.string.remain_seats, item.spareNum)
+  }
+  val total = stringResource(id = R.string.remain_total, item.collectNum)
+  // 이미 신청할 수 없는 강좌에서는 자리가 얼마 안 남았다는 경고가 의미 없으므로 강조하지 않는다.
+  val remainColor = if (item.isAlmostFull && !inactive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+  val totalColor = MaterialTheme.colorScheme.onSurfaceVariant
+  Text(
+    text = buildAnnotatedString {
+      withStyle(style = SpanStyle(color = remainColor, fontWeight = FontWeight.Medium)) { append(remain) }
+      withStyle(style = SpanStyle(color = totalColor)) { append(total) }
+    },
+    style = MaterialTheme.typography.bodyLarge
+  )
+}
+
+/** 정원 대비 신청 인원을 보여 주는 막대. 같은 내용을 [RemainText]가 글로 전하므로 스크린리더에는 노출하지 않는다. */
+@Composable
+private fun EnrollBar(ratio: Float, color: Color) {
+  Box(
+    modifier = Modifier
+      .fillMaxWidth()
+      .height(4.dp)
+      .clip(RoundedCornerShape(2.dp))
+      .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+  ) {
+    Box(
+      modifier = Modifier
+        .fillMaxWidth(ratio)
+        .fillMaxHeight()
+        .background(color)
+    )
   }
 }
 
@@ -305,33 +465,4 @@ fun ErrorView(throwable: Throwable, onRetry: () -> Unit, modifier: Modifier = Mo
       Text(text = stringResource(id = R.string.retry))
     }
   }
-}
-
-@Composable
-fun RowView(title: String, value: String) {
-  Row(modifier = Modifier.padding(top = 10.dp, start = 0.dp)) {
-    RowTitle(text = title)
-    RowValue(text = value)
-  }
-}
-
-@Composable
-fun RowTitle(text: String) {
-  Text(
-    text = "$text: ",
-    textAlign = TextAlign.End,
-    maxLines = 1,
-    fontSize = 16.sp,
-    fontWeight = FontWeight.Bold,
-    modifier = Modifier.defaultMinSize(70.dp)
-  )
-}
-
-@Composable
-fun RowValue(text: String) {
-  Text(
-    text = text,
-    fontSize = 16.sp,
-    fontWeight = FontWeight.Normal
-  )
 }
