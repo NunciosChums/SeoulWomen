@@ -8,6 +8,17 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
+// 스크립트 프로퍼티는 선언 순서대로 초기화되므로, 이를 사용하는 android 블록보다 위에 둔다.
+val localProperties: Properties by lazy {
+  Properties().apply {
+    providers.fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+      .asText.orNull?.let { load(it.reader()) }
+  }
+}
+
+fun readProperty(key: String): String =
+  localProperties.getProperty(key) ?: error("local.properties 에 $key 가 없습니다")
+
 android {
   namespace = "kr.susemi99.seoulwomen"
   compileSdk {
@@ -47,11 +58,6 @@ android {
     compose = true
     buildConfig = true
   }
-}
-
-fun readProperty(key: String): String {
-  val localProperties = providers.fileContents(rootProject.layout.projectDirectory.file("local.properties")).asText.orNull.orEmpty()
-  return Properties().apply { load(localProperties.reader()) }.getProperty(key)
 }
 
 dependencies {
